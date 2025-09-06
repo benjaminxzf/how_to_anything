@@ -1,100 +1,60 @@
-# How-To-Anything App
+# How To Anything — Flutter App
 
-An AI-powered tutorial generator that creates interactive, multimedia how-to guides using Google's Gemini APIs.
+An interactive Flutter application that generates step‑by‑step tutorials using Google Gemini. It features a liquid search bar with optional image context, swipeable tutorial cards, and live image generation per step.
+
+This repository’s Flutter app lives in `how_to_anything_flutter/`.
 
 ## Features
 
-- **Structured Tutorial Generation**: Uses Gemini 2.5 Pro to create detailed step-by-step tutorials with tips, warnings, and time estimates
-- **Photorealistic Images**: Generates consistent, instructional images for each step using Gemini 2.5 Flash Image (Nano Banana)
-- **Voice Narration**: Creates voice-over instructions using Gemini 2.5 Pro Preview TTS with multiple voice options
-- **Interactive HTML Viewer**: Beautiful web interface to view tutorials with images and audio
+- AI tutorial generation via Gemini 2.5 Flash (text)
+- Optional image context (camera/gallery) to guide results
+- Asynchronous step image generation with progress overlay
+- Swipeable overview and per‑step cards with tips/warnings/tools
+- Provider‑based state management and graceful error handling
 
-## Installation
+## Quick Start
 
+Prerequisites
+- Flutter (stable)
+- Dart >= 3.8
+- Google AI Studio API key (Generative Language API)
+
+Setup
 ```bash
-# Install dependencies
-pip3 install -r requirements.txt
+cd how_to_anything_flutter
+flutter pub get
 ```
 
-## Usage
+Create `.env` in `how_to_anything_flutter/`:
+```env
+GEMINI_API_KEY=your_api_key
+```
 
+Run (Web)
 ```bash
-python3 how_to_anything.py "how to [your topic]"
+flutter run -d chrome
 ```
 
-Examples:
+Run (Android)
 ```bash
-python3 how_to_anything.py "how to tie a tie"
-python3 how_to_anything.py "how to replace car batteries"
-python3 how_to_anything.py "how to make coffee"
+flutter run -d android
 ```
 
-## Output Structure
+Production builds
+```bash
+# Web
+flutter build web --release
 
-Each tutorial creates a folder with:
-```
-tutorials/
-└── [tutorial_name_timestamp]/
-    ├── tutorial.json       # Structured tutorial data
-    ├── images/            # Step-by-step images
-    │   ├── step_1.png
-    │   ├── step_2.png
-    │   └── ...
-    ├── audio/             # Voice narrations
-    │   ├── step_1.wav
-    │   ├── step_2.wav
-    │   └── ...
-    └── index.html         # Interactive viewer
+# Android
+flutter build apk --release
 ```
 
-## Features Breakdown
+## Configuration Notes
 
-### 1. Tutorial Generation
-- Uses Gemini 2.5 Pro with structured output (Pydantic models)
-- Generates comprehensive tutorials with:
-  - Step-by-step instructions
-  - Time estimates
-  - Required tools and materials
-  - Safety warnings
-  - Helpful tips
+- Firebase is initialized via `lib/firebase_options.dart` (web/android configured; iOS/macOS/windows are placeholders).
+- `.env` is declared as a Flutter asset; ensure it exists at runtime.
+- If targeting camera on Android/iOS, ensure camera permissions are configured.
 
-### 2. Image Generation
-- Uses Gemini 2.5 Flash Image (Nano Banana) for photorealistic images
-- Maintains visual consistency by using previous images as context
-- Each image shows the specific action or state for that step
+## Docs
 
-### 3. Voice Narration
-- Uses Gemini 2.5 Pro Preview TTS
-- Rotates through 8 different voices for variety
-- Clear, instructional tone for easy following
-- WAV format for universal browser support
-
-### 4. HTML Viewer
-- Clean, responsive design
-- Audio controls for each step
-- Visual hierarchy with numbered steps
-- Tips and warnings highlighted
-- Tools and materials clearly listed
-
-## API Configuration
-
-The app uses the Gemini API key embedded in the script. For production use, consider:
-- Setting the API key as an environment variable
-- Using the `--api-key` command-line argument
-
-## Performance Notes
-
-- Tutorial generation: ~10-20 seconds
-- Image generation: ~10-15 seconds per image
-- Voice generation: ~5-30 seconds per step (depending on text length)
-- Total time: 3-5 minutes for a typical 6-8 step tutorial
-
-## Requirements
-
-- Python 3.8+
-- Gemini API access
-- Internet connection for API calls
-
-## License
-
-This project uses the Gemini API with the provided API key for demonstration purposes.
+For architecture details, dependencies, troubleshooting, and roadmap, see `how_to_anything_flutter/README.md`.

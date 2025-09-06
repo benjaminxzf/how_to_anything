@@ -175,8 +175,4 @@ Security
 - Offline save for tutorials
 - iOS/macOS/windows first‑class support
 
-## Related
-
-- Python CLI generator lives in the repository root (`how_to_anything.py`). It produces JSON, images, audio, and an HTML viewer. The Flutter app generates tutorials live on device.
-
 — Built with Flutter and Google Gemini

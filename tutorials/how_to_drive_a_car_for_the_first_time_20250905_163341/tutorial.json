@@ -1,0 +1,139 @@
+{
+  "title": "How to Drive a Car for the First Time (Automatic Transmission)",
+  "description": "A step-by-step beginner's guide to the absolute basics of operating a car, from adjusting your seat to making your first slow, controlled movements in a safe environment.",
+  "difficulty": "Easy",
+  "total_time": "1 - 2 hours",
+  "tools_required": [
+    "A car with an automatic transmission",
+    "A valid learner's permit or driver's license (as required by law)",
+    "A licensed, experienced driver to supervise",
+    "A large, empty, and private parking lot or similar open space",
+    "Comfortable, closed-toe shoes",
+    "Sunglasses (optional, for sunny days)"
+  ],
+  "steps": [
+    {
+      "step_number": 1,
+      "title": "Pre-Drive Cockpit Familiarization",
+      "description": "Before starting the car, sit in the driver's seat and familiarize yourself with the primary controls. Identify the steering wheel, the two pedals on the floor (the wider one on the left is the brake, the narrower one on the right is the accelerator/gas), the gear selector (usually labeled P, R, N, D), the parking brake (either a lever between the seats or a small pedal to the far left), and the ignition (either a key slot or a push-to-start button). Locate the controls for headlights, turn signals, and windshield wipers.",
+      "tips": [
+        "Do this with the engine completely off to safely learn the layout without any risk of accidental movement.",
+        "Press the brake and accelerator pedals with your right foot to feel the difference in their resistance."
+      ],
+      "warnings": [
+        "Never use your left foot for the pedals in an automatic car. Your right foot will control both the brake and the accelerator."
+      ],
+      "tools_needed": [
+        "Car with automatic transmission"
+      ],
+      "estimated_time": "10 minutes",
+      "image_prompt": "A wide-angle, photorealistic shot from the passenger seat perspective, looking at a new driver in the driver's seat. The driver is pointing to the gear selector. The pedals, steering wheel, and dashboard are all clearly visible. The car is a modern sedan, parked in a bright, empty parking lot during the daytime."
+    },
+    {
+      "step_number": 2,
+      "title": "Adjusting Your Seat and Mirrors",
+      "description": "Adjust your seat so you can press the brake pedal fully to the floor without stretching your leg. You should have a slight bend in your knee. Adjust the steering wheel so your wrists rest on top of it when you extend your arms. Next, adjust your rearview mirror to see the entire rear window. Then, adjust your left and right side-view mirrors so you can just barely see the side of your own car in the inner edge of each mirror. This minimizes blind spots.",
+      "tips": [
+        "Proper posture is key. Sit up straight with your back firmly against the seat.",
+        "Take your time with the mirrors. They are your most important tool for situational awareness."
+      ],
+      "warnings": [
+        "Always make these adjustments before you start the engine."
+      ],
+      "tools_needed": [],
+      "estimated_time": "5 minutes",
+      "image_prompt": "A photorealistic, over-the-shoulder shot of the driver adjusting the driver's side-view mirror using the electronic controls on the door panel. The reflection in the mirror clearly shows the empty parking lot behind, with just a sliver of the car's rear door visible. The lighting is bright and sunny, consistent with the previous shot."
+    },
+    {
+      "step_number": 3,
+      "title": "Starting the Engine and Engaging Drive",
+      "description": "Press your right foot firmly down on the brake pedal. With your foot on the brake, either turn the key in the ignition or press the 'Start' button until the engine turns on. Continue keeping your foot on the brake. Now, press the button on the gear selector and move it from 'P' (Park) down to 'D' (Drive). You may feel a very slight shudder as the gear engages. Finally, release the parking brake.",
+      "tips": [
+        "Most modern cars will not start unless the brake pedal is depressed.",
+        "Listen to the sound of the engine. It will idle at a low, steady hum."
+      ],
+      "warnings": [
+        "The car will begin to move forward slowly ('creep') on its own once you shift into Drive and release the brake. Always keep your foot on the brake until you are ready to move."
+      ],
+      "tools_needed": [],
+      "estimated_time": "5 minutes",
+      "image_prompt": "A close-up, photorealistic shot focusing on the driver's hand moving the automatic gear selector from 'P' to 'D'. The selector knob is illuminated. In the background, the dashboard is lit up. The driver's foot is clearly visible on the brake pedal in the footwell. The setting remains the same sunny, empty parking lot."
+    },
+    {
+      "step_number": 4,
+      "title": "Moving Forward and Gentle Acceleration",
+      "description": "Look forward and check your surroundings to ensure your path is clear. Very slowly and gradually, lift your foot off the brake pedal. The car will begin to creep forward at about 3-5 mph without any gas. Let it do this for a few feet. To go faster, pivot your right foot from the brake to the accelerator and apply extremely light, gentle pressure. Imagine there is an egg under your foot that you don't want to break. A small amount of pressure is all you need.",
+      "tips": [
+        "Practice just letting the car creep forward and then re-applying the brake to get a feel for its movement.",
+        "Keep your eyes looking far ahead in the direction you want to go, not down at the hood of the car."
+      ],
+      "warnings": [],
+      "tools_needed": [],
+      "estimated_time": "15 minutes",
+      "image_prompt": "A low-angle, photorealistic shot from outside the car, near the front passenger-side wheel. The car is moving forward very slowly across the asphalt of the empty parking lot. The driver's face is visible through the windshield, showing intense focus looking far ahead. Bright, direct sunlight creates a clean, high-contrast look."
+    },
+    {
+      "step_number": 5,
+      "title": "Smooth Braking",
+      "description": "To slow down or stop, lift your foot completely off the accelerator and place it on the brake pedal. Apply gentle, steady pressure. The earlier you begin braking, the less pressure you'll need and the smoother your stop will be. Aim to bring the car to a stop without any sudden jerking motion. Practice stopping at a specific line on the pavement.",
+      "tips": [
+        "Feel how the car's momentum shifts forward as you brake. The goal is to manage that shift smoothly.",
+        "For a perfect stop, slightly ease up on the brake pressure just before the car comes to a complete halt to avoid a final 'jerk'."
+      ],
+      "warnings": [
+        "In an emergency, you will need to press the brake firmly and quickly. But for normal driving, smoothness is key."
+      ],
+      "tools_needed": [],
+      "estimated_time": "15 minutes",
+      "image_prompt": "A photorealistic interior shot focused on the driver's foot as it presses the brake pedal. The car is visibly slowing down, with a painted white line in the parking lot approaching just in front of the car's hood. The scene is bright and clear."
+    },
+    {
+      "step_number": 6,
+      "title": "Steering and Making Turns",
+      "description": "Hold the steering wheel with both hands at the '9 and 3 o'clock' positions. To make a gentle turn, use the 'push-pull' method: if turning right, push the wheel up with your left hand and pull it down with your right hand, letting it slide through your grip. Keep the car moving at a slow, steady speed (5-7 mph). The car will go where your eyes are looking, so look through the turn to your intended path.",
+      "tips": [
+        "Don't make sharp, jerky movements with the wheel. Small, smooth inputs are all that's needed.",
+        "After a turn, the steering wheel will want to straighten itself out. Let it slide back through your hands, controlling its speed."
+      ],
+      "warnings": [],
+      "tools_needed": [],
+      "estimated_time": "20 minutes",
+      "image_prompt": "A high-angle, photorealistic shot, as if from a low-flying drone, showing the sedan making a smooth 90-degree turn, following the painted lines of a parking lane. The front wheels are angled, and the car is in mid-turn. The sun is high, casting short, distinct shadows on the empty asphalt."
+    },
+    {
+      "step_number": 7,
+      "title": "Driving in Reverse",
+      "description": "Come to a complete stop. With your foot on the brake, shift the car into 'R' (Reverse). Turn your body to the right, placing your right arm on the back of the passenger seat. Look directly out the rear window. Place your left hand at the top (12 o'clock) of the steering wheel. Control your speed by easing off the brake; you will likely not need the accelerator. Steer in the direction you want the *back* of the car to go. Turning the wheel right makes the back of the car go right.",
+      "tips": [
+        "Reversing is almost always done at a very slow speed, controlled only by the brake pedal.",
+        "Use your mirrors and backup camera (if available), but always prioritize looking over your shoulder for the best view."
+      ],
+      "warnings": [
+        "This can feel counter-intuitive at first. Take it very slowly."
+      ],
+      "tools_needed": [],
+      "estimated_time": "10 minutes",
+      "image_prompt": "A photorealistic shot from the back seat looking forward, showing the driver turned around in their seat, looking over their right shoulder out the rear window. Their left hand is at the 12 o'clock position on the steering wheel. The car is visibly moving backward slowly in the empty, sunny parking lot."
+    },
+    {
+      "step_number": 8,
+      "title": "Parking and Securing the Vehicle",
+      "description": "Once you have finished practicing, find an empty parking spot and slowly pull in, coming to a complete stop. With your foot still on the brake, shift the gear selector back to 'P' (Park). Next, firmly engage the parking brake. Now it is safe to turn off the engine by turning the key or pressing the 'Stop' button. The lesson is complete.",
+      "tips": [
+        "Always follow this sequence: Stop -> Shift to Park -> Engage Parking Brake -> Turn off Engine.",
+        "Double-check that you have turned off your headlights and removed the key before exiting the vehicle."
+      ],
+      "warnings": [],
+      "tools_needed": [],
+      "estimated_time": "5 minutes",
+      "image_prompt": "A photorealistic side-profile shot from outside the car, showing it perfectly centered in a parking space. The driver's hand is visible through the open window, pulling up the manual parking brake lever located between the front seats. The car is stationary and the lesson is clearly concluding in the bright, empty lot."
+    }
+  ],
+  "safety_notes": [
+    "Always drive with a licensed instructor or experienced driver.",
+    "Only practice in a safe, controlled environment away from other cars and pedestrians.",
+    "Eliminate distractions: put your phone away and turn off the radio.",
+    "Always wear your seatbelt.",
+    "Never drive under the influence of alcohol or drugs, or when you are overly tired."
+  ]
+}

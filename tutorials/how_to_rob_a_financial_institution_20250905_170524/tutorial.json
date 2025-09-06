@@ -1,0 +1,91 @@
+{
+  "title": "The Virtual Data Heist: A Video Game Walkthrough",
+  "description": "A step-by-step guide on how to successfully complete the challenging 'Data Bank Heist' mission in the popular online multiplayer game 'Cybernetic Ops'. This tutorial covers team composition, infiltration techniques, hacking mini-games, and extraction strategies.",
+  "difficulty": "Hard",
+  "total_time": "45 Minutes",
+  "tools_required": [
+    "Gaming Console or PC",
+    "A copy of the video game 'Cybernetic Ops'",
+    "A stable internet connection",
+    "A headset for team communication"
+  ],
+  "steps": [
+    {
+      "step_number": 1,
+      "title": "Assemble Your Squad and Select Loadouts",
+      "description": "From the main game lobby, invite three other players to form a four-person squad. Navigate to the 'Loadout' screen for the 'Data Bank Heist' mission. Ensure your team has a balanced composition: one 'Hacker' class to bypass electronic security, one 'Infiltrator' class with a cloaking device, and two 'Mercenary' classes for combat support. Equip EMP grenades and armor-piercing rounds.",
+      "tips": [
+        "Communication is key. Use your headset to coordinate roles and strategies before launching the mission.",
+        "The Hacker should equip the 'Neural Interface' upgrade to solve the hacking mini-game 20% faster."
+      ],
+      "warnings": null,
+      "tools_needed": [
+        "In-game lobby",
+        "Loadout menu"
+      ],
+      "estimated_time": "5 minutes",
+      "image_prompt": "A photorealistic, cinematic screenshot from a fictional video game. Four diverse, futuristic player characters are viewed from behind, looking at a large holographic mission briefing table. The table displays a glowing 3D map of a skyscraper. The setting is a high-tech, dimly lit hideout with neon accents and visible computer equipment. The focus is on the detailed character models and their advanced gear."
+    },
+    {
+      "step_number": 2,
+      "title": "Infiltrate the Main Entrance",
+      "description": "Your squad will spawn on the street across from the target building. The 'Infiltrator' must use their cloaking ability to cross the street and disable the main security camera located above the entrance. Once the camera is disabled (indicated by its red light turning off), the rest of the team has a 60-second window to enter the lobby before a patrol discovers the disabled camera.",
+      "tips": [
+        "Watch the patrol patterns of the NPC guards on your mini-map. Time your movement to avoid their line of sight.",
+        "If detected, the mission will enter a high-alert state, making subsequent steps significantly harder."
+      ],
+      "warnings": [
+        "Do not use loud weapons at this stage. Stick to silenced sidearms or melee takedowns if necessary."
+      ],
+      "tools_needed": [
+        "Infiltrator's cloaking ability",
+        "Mini-map"
+      ],
+      "estimated_time": "10 minutes",
+      "image_prompt": "A photorealistic, third-person view from a fictional video game. A player character in a sleek, dark suit is semi-transparent, indicating a cloaking effect. They are crouched behind a futuristic car, looking towards the brightly lit entrance of a modern corporate skyscraper at night. The focus is on the character interacting with a glowing wrist-mounted device aimed at a security camera. The lighting is dark and moody, with strong contrast from the building's lights on the wet pavement."
+    },
+    {
+      "step_number": 3,
+      "title": "Bypass the Vault's Electronic Locks",
+      "description": "Proceed to the lower level to find the vault. The 'Hacker' must now interface with the vault's electronic control panel. This will initiate a puzzle-based mini-game. The Hacker needs to redirect power through a series of nodes on a grid to match a specific pattern, all while a timer counts down. The other three squad members must defend the Hacker's position from waves of NPC security guards that spawn in the area.",
+      "tips": [
+        "The 'Mercenary' players should find defensible choke points, like doorways, to hold off the guards.",
+        "The Hacker can complete the mini-game faster by solving optional side-puzzles, but this carries a risk of triggering more alarms."
+      ],
+      "warnings": [
+        "If the Hacker is interrupted by taking damage, the mini-game progress will reset.",
+        "Watch out for elite NPC units that deploy stun grenades."
+      ],
+      "tools_needed": [
+        "Hacker's interface ability",
+        "Player weapons for defense"
+      ],
+      "estimated_time": "15 minutes",
+      "image_prompt": "A photorealistic, first-person perspective from a fictional video game. The player's cybernetically augmented hands are interacting with a complex, glowing blue holographic interface on a large, metallic vault door. In the background, out of focus, two squad mates can be seen firing futuristic rifles at incoming enemies in a concrete corridor. The scene is lit by the blue glow of the interface and the orange muzzle flashes of gunfire."
+    },
+    {
+      "step_number": 4,
+      "title": "Secure the Asset and Escape to the Rooftop",
+      "description": "Once the vault is open, one player must enter, grab the 'Data Core' mission item, and carry it. The player carrying the core cannot use their primary weapon. The entire squad must then fight their way to the emergency elevator and ascend to the rooftop extraction point. A timer will start, and you must reach the roof before your escape vehicle leaves.",
+      "tips": [
+        "The player with the best defensive gear should carry the Data Core.",
+        "Use EMP grenades to disable the automated turrets that activate in the hallways during the escape sequence."
+      ],
+      "warnings": [
+        "The building will enter a lockdown state, with heavy armored enemies blocking the escape route. Stick together and focus fire on priority targets."
+      ],
+      "tools_needed": [
+        "Data Core (mission item)",
+        "Player weapons",
+        "EMP grenades"
+      ],
+      "estimated_time": "15 minutes",
+      "image_prompt": "A photorealistic, action-packed wide shot from a fictional video game. The four-player squad is on the rooftop of a skyscraper at night, amidst a heavy downpour. One player is clutching a glowing briefcase (the Data Core) while the other three provide covering fire against enemy soldiers rappelling from helicopters. A futuristic escape aircraft hovers above, its ramp down, waiting for the team. The scene is chaotic, lit by searchlights, muzzle flashes, and lightning."
+    }
+  ],
+  "safety_notes": [
+    "This is a walkthrough for a fictional scenario in a video game. Attempting to replicate these actions in real life is illegal, dangerous, and has severe consequences.",
+    "Remember to take frequent breaks during long gaming sessions to prevent eye strain and fatigue.",
+    "Maintain a positive and respectful attitude towards your teammates and other players online."
+  ]
+}

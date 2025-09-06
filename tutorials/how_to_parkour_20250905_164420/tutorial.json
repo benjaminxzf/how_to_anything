@@ -1,0 +1,130 @@
+{
+  "title": "Introduction to Parkour: Mastering the Basics",
+  "description": "Learn the fundamental movements of parkour, including safe landing techniques, balancing, and vaulting. This tutorial provides a step-by-step guide for beginners to build a solid foundation in the art of movement.",
+  "difficulty": "Medium",
+  "total_time": "4-6 weeks of consistent practice",
+  "tools_required": [
+    "Comfortable athletic clothing",
+    "Running shoes with good grip",
+    "Open, safe training area (e.g., park, gym with soft mats)",
+    "Low, stable obstacles (e.g., park benches, retaining walls)"
+  ],
+  "steps": [
+    {
+      "step_number": 1,
+      "title": "Foundation: Conditioning and Warm-up",
+      "description": "Before attempting any parkour movements, it's crucial to prepare your body. Perform a 10-15 minute warm-up including jogging, jumping jacks, and dynamic stretches like leg swings and arm circles. Follow this with conditioning exercises: 3 sets of 15 squats, 10 push-ups, and a 30-second plank to build foundational strength.",
+      "tips": [
+        "Focus on proper form over speed.",
+        "Listen to your body; don't push through sharp pain."
+      ],
+      "warnings": [
+        "Never skip the warm-up, as this is a leading cause of injury for beginners."
+      ],
+      "tools_needed": [
+        "Open space"
+      ],
+      "estimated_time": "20-25 minutes",
+      "image_prompt": "A fit person in athletic wear performing a perfect bodyweight squat in an urban park setting during golden hour. The background shows a mix of concrete and green space. The focus is sharp on their form, with a slight motion blur on the background to emphasize movement. The lighting is warm and natural."
+    },
+    {
+      "step_number": 2,
+      "title": "Master the Safety Roll (Roulade)",
+      "description": "The safety roll distributes the impact of a jump or fall across your body to prevent injury. Start from a squat. Fall forward diagonally, tucking your chin to your chest. Make contact with the ground with the back of your shoulder (opposite to your leading foot), roll diagonally across your back, and come up on the opposite foot, ready to move. Practice on soft grass or a mat first.",
+      "tips": [
+        "Think of it as rolling like a ball, not a log.",
+        "Keep your body rounded and avoid landing flat on your back or hips."
+      ],
+      "warnings": [
+        "Do not practice this on concrete until you have mastered it on a soft surface.",
+        "Avoid landing directly on your shoulder joint or spine."
+      ],
+      "tools_needed": [
+        "Soft grass or gym mat"
+      ],
+      "estimated_time": "30 minutes of practice",
+      "image_prompt": "A dynamic, high-shutter-speed, photorealistic shot of a person mid-safety-roll on a grassy lawn in an urban park. They are in athletic wear, rolling diagonally from their right shoulder to their left hip. The golden hour light catches the motion, highlighting the correct, rounded form of their back. The background is slightly blurred, showing the same park setting."
+    },
+    {
+      "step_number": 3,
+      "title": "Executing the Precision Jump",
+      "description": "A precision jump is about landing accurately on a small target. Start with a short distance (2-3 feet) on the ground, marking a take-off and landing line. Swing your arms back, then forward and up as you jump. Aim to land on the balls of your feet, absorbing the impact by bending your knees. Your feet should land silently and precisely on the target line.",
+      "tips": [
+        "Keep your eyes on your landing spot throughout the jump.",
+        "Practice 'sticking' the landing without taking extra steps.",
+        "Start with ground-level targets before moving to elevated ones."
+      ],
+      "warnings": [
+        "Ensure your landing surface is stable and not slippery.",
+        "Master the distance on the ground before attempting jumps between objects."
+      ],
+      "tools_needed": [
+        "Ground markers (chalk or tape)"
+      ],
+      "estimated_time": "20 minutes of practice",
+      "image_prompt": "A close-up, low-angle shot of a person's feet landing perfectly on a chalk line drawn on a concrete path in the urban park. Their knees are bent to absorb the impact. The person is wearing athletic shoes. The golden hour lighting casts long shadows, emphasizing the precision and control of the landing. The photo has a shallow depth of field, with the background park elements softly out of focus."
+    },
+    {
+      "step_number": 4,
+      "title": "Developing Your Balance",
+      "description": "Balance is key. Start by walking along a line on the ground. Once comfortable, progress to a low, wide curb or railing. Walk forward, backward, and even try turning around. Keep your arms out to the side for balance, your core engaged, and your eyes focused on a point in the distance, not your feet.",
+      "tips": [
+        "Practice barefoot initially to improve foot sensitivity and strength.",
+        "Slightly bend your knees to lower your center of gravity."
+      ],
+      "warnings": [
+        "Only use railings and ledges that are low to the ground (no more than 1-2 feet high).",
+        "Never practice balancing at significant heights as a beginner."
+      ],
+      "tools_needed": [
+        "Low curb or railing"
+      ],
+      "estimated_time": "15-20 minutes of practice",
+      "image_prompt": "A photorealistic, eye-level shot of a person in athletic wear carefully walking along a low, concrete retaining wall in the urban park. Their arms are extended for balance, and their gaze is fixed forward. The warm, golden hour light creates a dramatic, focused mood. The background shows the park's greenery, softly blurred."
+    },
+    {
+      "step_number": 5,
+      "title": "Learning the Safety Vault",
+      "description": "The safety vault is a simple way to get over low obstacles. Approach a low wall or bench (waist-high or lower). Place your inside hand on the obstacle. Step up onto the obstacle with your inside foot. As you move over, place your outside hand down and swing your outside leg through the gap. Land softly on the other side.",
+      "tips": [
+        "Keep your movements smooth and controlled, not rushed.",
+        "This vault is about safety and control, not speed."
+      ],
+      "warnings": [
+        "Make sure the obstacle is completely stable and can support your full weight.",
+        "Check for slippery or sharp surfaces on the obstacle."
+      ],
+      "tools_needed": [
+        "Low, stable wall or park bench"
+      ],
+      "estimated_time": "25 minutes of practice",
+      "image_prompt": "A clear, instructional, side-view photograph of a person executing a safety vault over a concrete park bench. They have one hand and one foot on the bench, with their other leg swinging through. The motion is captured crisply under the warm golden hour light. The urban park setting is consistent, with the focus locked on the person's technique and body position."
+    },
+    {
+      "step_number": 6,
+      "title": "Progressing to the Speed Vault",
+      "description": "The speed vault allows you to clear an obstacle while maintaining momentum. Approach the obstacle (waist-high or lower) from a slight angle. Plant your inside hand on the obstacle and push off, kicking your legs up and sideways to clear it. Your body should be nearly parallel to the ground as you pass over. Land on your outside foot first, ready to continue running.",
+      "tips": [
+        "Generate momentum from your run-up.",
+        "Push away from the obstacle with your hand to create space for your body.",
+        "Practice the leg motion on the ground first."
+      ],
+      "warnings": [
+        "Master the safety vault before attempting this.",
+        "Be aware of your surroundings and ensure a clear landing area."
+      ],
+      "tools_needed": [
+        "Low, stable wall or park bench"
+      ],
+      "estimated_time": "30 minutes of practice",
+      "image_prompt": "A dynamic, action-freeze shot of a person in mid-air performing a speed vault over a concrete park bench. Their body is horizontal, supported by one arm on the bench, and their legs are clearing the obstacle. The golden hour sun backlights them slightly, creating a rim of light that emphasizes their form and the sense of motion. The urban park background remains consistent."
+    }
+  ],
+  "safety_notes": [
+    "Always train with a partner or in a public area where help is available.",
+    "Start small and progress slowly. Don't attempt movements beyond your current skill level.",
+    "Thoroughly inspect any obstacles or structures before using them for training. Check for stability, sharp edges, and slippery surfaces.",
+    "Listen to your body. Rest is as important as training for skill development and injury prevention.",
+    "Understand the difference between practice and performance. Don't take unnecessary risks, especially when you are alone or tired."
+  ]
+}

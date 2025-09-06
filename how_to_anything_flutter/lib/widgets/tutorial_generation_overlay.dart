@@ -92,7 +92,10 @@ class _TutorialGenerationOverlayState extends State<TutorialGenerationOverlay>
               children: [
                 // Ghost header
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: MediaQuery.of(context).size.width < 600 ? 12 : 20, 
+                    vertical: 16
+                  ),
                   child: Row(
                     children: [
                       _buildGhostIcon(),

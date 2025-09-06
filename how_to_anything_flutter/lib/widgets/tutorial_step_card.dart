@@ -107,7 +107,9 @@ class _BananaLoadingPlaceholderState extends State<_BananaLoadingPlaceholder>
           ),
           const SizedBox(height: 8),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
+            padding: EdgeInsets.symmetric(
+              horizontal: MediaQuery.of(context).size.width < 600 ? 12 : 20
+            ),
             child: Text(
               widget.imagePrompt.length > 60 
                 ? '${widget.imagePrompt.substring(0, 60)}...'

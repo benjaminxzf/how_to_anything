@@ -204,6 +204,9 @@ ${step.description.length > 200 ? step.description.substring(0, 200) + '...' : s
     onProgress?.call('Tutorial text ready! Loading images...');
     
     if (generateImages) {
+      print('[GeminiService] Image generation temporarily disabled to save API costs');
+      // TODO: Uncomment below lines to re-enable image generation
+      /*
       print('[GeminiService] Starting async image generation');
       // Generate images asynchronously after returning the tutorial
       // Important: We don't await this, so the tutorial returns immediately
@@ -212,6 +215,7 @@ ${step.description.length > 200 ? step.description.substring(0, 200) + '...' : s
       }).catchError((error) {
         print('[GeminiService] Error in async image generation: $error');
       });
+      */
     } else {
       print('[GeminiService] Image generation disabled');
     }

@@ -282,7 +282,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                           children: [
                             // Static title
                             AnimatedOpacity(
-                              opacity: _searchFocusNode.hasFocus ? 0.3 : 1.0,
+                              opacity: 1.0,
                               duration: const Duration(milliseconds: 300),
                               child: const Text(
                                 'How to Anything',

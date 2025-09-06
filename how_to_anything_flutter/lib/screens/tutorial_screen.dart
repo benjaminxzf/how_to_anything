@@ -90,7 +90,10 @@ class _TutorialScreenState extends State<TutorialScreen> with TickerProviderStat
               children: [
                 // Minimal header
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: MediaQuery.of(context).size.width < 600 ? 12 : 20, 
+                    vertical: 16
+                  ),
                   child: Row(
                     children: [
                       // Back button
@@ -148,15 +151,24 @@ class _TutorialScreenState extends State<TutorialScreen> with TickerProviderStat
                     itemBuilder: (context, index) {
                       if (index == 0) {
                         // Overview card
-                        return TutorialOverviewCard(
-                          tutorial: tutorial,
-                          isActive: _currentIndex == 0,
+                        return Padding(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: MediaQuery.of(context).size.width < 600 ? 2 : 4, 
+                            vertical: 10
+                          ),
+                          child: TutorialOverviewCard(
+                            tutorial: tutorial,
+                            isActive: _currentIndex == 0,
+                          ),
                         );
                       } else {
                         // Step cards
                         final step = tutorial.steps[index - 1];
                         return Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                          padding: EdgeInsets.symmetric(
+                            horizontal: MediaQuery.of(context).size.width < 600 ? 2 : 4, 
+                            vertical: 10
+                          ),
                           child: TutorialStepCard(
                             key: ValueKey('step_${index - 1}_${step.imageUrl != null}'), // Force rebuild when image changes
                             step: step,

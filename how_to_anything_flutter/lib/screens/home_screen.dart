@@ -164,7 +164,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       _searchFocusNode.unfocus();
       HapticFeedback.lightImpact();
       final tutorialProvider = context.read<TutorialProvider>();
-      tutorialProvider.generateTutorial(query, generateImages: _generateImages);
+      tutorialProvider.generateTutorial(
+        query, 
+        generateImages: _generateImages,
+        imageBytes: tutorialProvider.selectedImageBytes,
+      );
     }
   }
 
@@ -301,6 +305,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                               onSearch: _handleSearch,
                               hintText: _displayedSuggestion,
                               width: math.min(600, screenWidth * 0.85),
+                              onImageSelected: (imageBytes) {
+                                final tutorialProvider = context.read<TutorialProvider>();
+                                tutorialProvider.setSelectedImage(imageBytes);
+                              },
                             ),
                             
                             const SizedBox(height: 60),

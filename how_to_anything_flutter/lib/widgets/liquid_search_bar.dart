@@ -1,7 +1,9 @@
 import 'dart:math' as math;
 import 'dart:ui';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:image_picker/image_picker.dart';
 import '../utils/animation_utils.dart';
 
 class LiquidSearchBar extends StatefulWidget {
@@ -10,6 +12,7 @@ class LiquidSearchBar extends StatefulWidget {
   final VoidCallback onSearch;
   final String hintText;
   final double width;
+  final Function(Uint8List?)? onImageSelected;
   
   const LiquidSearchBar({
     Key? key,
@@ -18,6 +21,7 @@ class LiquidSearchBar extends StatefulWidget {
     required this.onSearch,
     this.hintText = '',
     this.width = 600,
+    this.onImageSelected,
   }) : super(key: key);
 
   @override
@@ -30,11 +34,13 @@ class _LiquidSearchBarState extends State<LiquidSearchBar>
   late AnimationController _pulseController;
   late AnimationController _rippleController;
   late AnimationController _magnetController;
+  late AnimationController _imageController;
   
   late Animation<double> _morphAnimation;
   late Animation<double> _pulseAnimation;
   late Animation<double> _rippleAnimation;
   late Animation<double> _magnetAnimation;
+  late Animation<double> _imageAnimation;
   
   bool _isHovering = false;
   bool _isFocused = false;
@@ -42,6 +48,8 @@ class _LiquidSearchBarState extends State<LiquidSearchBar>
   double _magneticPull = 0.0;
   
   final List<RippleData> _ripples = [];
+  Uint8List? _selectedImageBytes;
+  final ImagePicker _imagePicker = ImagePicker();
   
   @override
   void initState() {
@@ -64,6 +72,11 @@ class _LiquidSearchBarState extends State<LiquidSearchBar>
     
     _magnetController = AnimationController(
       duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+    
+    _imageController = AnimationController(
+      duration: const Duration(milliseconds: 400),
       vsync: this,
     );
     
@@ -99,6 +112,14 @@ class _LiquidSearchBarState extends State<LiquidSearchBar>
       curve: const MagneticCurve(attraction: 2.0, range: 0.3),
     ));
     
+    _imageAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _imageController,
+      curve: Curves.elasticOut,
+    ));
+    
     widget.focusNode.addListener(_onFocusChange);
   }
   
@@ -132,12 +153,172 @@ class _LiquidSearchBarState extends State<LiquidSearchBar>
     });
   }
   
+  void _showImagePickerDialog() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        decoration: BoxDecoration(
+          color: const Color(0xFF1A1A25).withOpacity(0.95),
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+          border: Border.all(
+            color: Colors.white.withOpacity(0.1),
+            width: 1,
+          ),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40,
+              height: 4,
+              margin: const EdgeInsets.symmetric(vertical: 12),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.3),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                children: [
+                  Text(
+                    'Add Image to Tutorial',
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.9),
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Include an image to help AI create better tutorials',
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.6),
+                      fontSize: 14,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 20),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _buildImageOptionButton(
+                          icon: Icons.photo_library,
+                          label: 'Gallery',
+                          onTap: () => _pickImage(ImageSource.gallery),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: _buildImageOptionButton(
+                          icon: Icons.camera_alt,
+                          label: 'Camera',
+                          onTap: () => _pickImage(ImageSource.camera),
+                        ),
+                      ),
+                    ],
+                  ),
+                  if (_selectedImageBytes != null) ...[
+                    const SizedBox(height: 16),
+                    _buildImageOptionButton(
+                      icon: Icons.delete_outline,
+                      label: 'Remove Image',
+                      onTap: _removeImage,
+                      color: Colors.red.withOpacity(0.8),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildImageOptionButton({
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+    Color? color,
+  }) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+          decoration: BoxDecoration(
+            border: Border.all(
+              color: (color ?? Colors.cyan).withOpacity(0.3),
+              width: 1,
+            ),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Column(
+            children: [
+              Icon(
+                icon,
+                color: color ?? Colors.cyan.withOpacity(0.8),
+                size: 28,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                label,
+                style: TextStyle(
+                  color: (color ?? Colors.cyan).withOpacity(0.9),
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _pickImage(ImageSource source) async {
+    Navigator.pop(context);
+    try {
+      final XFile? image = await _imagePicker.pickImage(
+        source: source,
+        maxWidth: 1024,
+        maxHeight: 1024,
+        imageQuality: 85,
+      );
+      
+      if (image != null) {
+        final bytes = await image.readAsBytes();
+        setState(() {
+          _selectedImageBytes = bytes;
+        });
+        _imageController.forward();
+        widget.onImageSelected?.call(bytes);
+      }
+    } catch (e) {
+      print('Error picking image: $e');
+    }
+  }
+
+  void _removeImage() {
+    Navigator.pop(context);
+    setState(() {
+      _selectedImageBytes = null;
+    });
+    _imageController.reverse();
+    widget.onImageSelected?.call(null);
+  }
+
   @override
   void dispose() {
     _morphController.dispose();
     _pulseController.dispose();
     _rippleController.dispose();
     _magnetController.dispose();
+    _imageController.dispose();
     widget.focusNode.removeListener(_onFocusChange);
     super.dispose();
   }
@@ -180,6 +361,7 @@ class _LiquidSearchBarState extends State<LiquidSearchBar>
             _pulseAnimation,
             _rippleAnimation,
             _magnetAnimation,
+            _imageAnimation,
           ]),
           builder: (context, child) {
             return Container(
@@ -218,6 +400,34 @@ class _LiquidSearchBarState extends State<LiquidSearchBar>
                       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                       child: Row(
                         children: [
+                          if (_selectedImageBytes != null)
+                            AnimatedBuilder(
+                              animation: _imageAnimation,
+                              builder: (context, child) {
+                                return Transform.scale(
+                                  scale: _imageAnimation.value,
+                                  child: Container(
+                                    width: 32,
+                                    height: 32,
+                                    margin: const EdgeInsets.only(right: 12),
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(8),
+                                      border: Border.all(
+                                        color: Colors.cyan.withOpacity(0.3),
+                                        width: 1,
+                                      ),
+                                    ),
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(7),
+                                      child: Image.memory(
+                                        _selectedImageBytes!,
+                                        fit: BoxFit.cover,
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
                           Expanded(
                             child: TextField(
                               controller: widget.controller,
@@ -247,6 +457,22 @@ class _LiquidSearchBarState extends State<LiquidSearchBar>
                               ),
                               textInputAction: TextInputAction.search,
                               onSubmitted: (_) => widget.onSearch(),
+                            ),
+                          ),
+                          SizedBox(
+                            width: 48,
+                            height: 60,
+                            child: IconButton(
+                              onPressed: _showImagePickerDialog,
+                              icon: Icon(
+                                Icons.image,
+                                color: _selectedImageBytes != null 
+                                    ? Colors.cyan.withOpacity(0.8)
+                                    : Colors.white.withOpacity(0.4),
+                                size: 20,
+                              ),
+                              padding: EdgeInsets.zero,
+                              alignment: Alignment.center,
                             ),
                           ),
                           SizedBox(

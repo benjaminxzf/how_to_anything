@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import '../models/tutorial.dart';
 import '../models/tutorial_step.dart';
@@ -18,15 +19,22 @@ class TutorialProvider extends ChangeNotifier {
   String _progressMessage = '';
   String _errorMessage = '';
   Map<int, String?> _stepImages = {};
+  Uint8List? _selectedImageBytes;
   
   TutorialState get state => _state;
   Tutorial? get tutorial => _tutorial;
   String get progressMessage => _progressMessage;
   String get errorMessage => _errorMessage;
+  Uint8List? get selectedImageBytes => _selectedImageBytes;
   
   String? getStepImage(int stepIndex) => _stepImages[stepIndex];
   
-  Future<void> generateTutorial(String query, {bool generateImages = true}) async {
+  void setSelectedImage(Uint8List? imageBytes) {
+    _selectedImageBytes = imageBytes;
+    notifyListeners();
+  }
+  
+  Future<void> generateTutorial(String query, {bool generateImages = true, Uint8List? imageBytes}) async {
     print('[TutorialProvider] Starting generateTutorial for: $query');
     _state = TutorialState.loading;
     _errorMessage = '';
@@ -43,6 +51,7 @@ class TutorialProvider extends ChangeNotifier {
           notifyListeners();
         },
         generateImages: generateImages,
+        imageBytes: imageBytes,
         onImageUpdate: (stepIndex, imageUrl) {
           print('[TutorialProvider] Image update received for step $stepIndex');
           print('[TutorialProvider] Image URL length: ${imageUrl?.length ?? 0}');
@@ -83,6 +92,7 @@ class TutorialProvider extends ChangeNotifier {
     _progressMessage = '';
     _errorMessage = '';
     _stepImages.clear();
+    _selectedImageBytes = null;
     notifyListeners();
   }
 }

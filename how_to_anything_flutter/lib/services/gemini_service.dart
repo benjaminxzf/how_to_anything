@@ -32,7 +32,7 @@ class GeminiService {
     );
   }
 
-  Future<Tutorial> generateTutorial(String howToQuery) async {
+  Future<Tutorial> generateTutorial(String howToQuery, {Uint8List? imageBytes}) async {
     final prompt = '''
 Create a concise, practical tutorial for: "$howToQuery"
 
@@ -100,7 +100,15 @@ Concise example (for "how to tie a tie"):
 ''';
 
     try {
-      final response = await _textModel.generateContent([Content.text(prompt)]);
+      // Prepare content parts for the request
+      List<Part> contentParts = [TextPart(prompt)];
+      
+      // Add image if provided
+      if (imageBytes != null) {
+        contentParts.add(InlineDataPart('image/jpeg', imageBytes));
+      }
+      
+      final response = await _textModel.generateContent([Content.multi(contentParts)]);
       if (response.text == null || response.text!.isEmpty) {
         throw Exception('No response text received from Gemini');
       }
@@ -126,7 +134,7 @@ Concise example (for "how to tie a tie"):
     }
   }
 
-  Future<Uint8List> generateStepImage(TutorialStep step, Uint8List? previousImageBytes) async {
+  Future<Uint8List> generateStepImage(TutorialStep step, Uint8List? previousImageBytes, {Uint8List? contextImageBytes}) async {
     print('[GeminiService] generateStepImage called for step ${step.stepNumber}: ${step.title}');
     try {
       // Create a detailed prompt for image generation
@@ -150,8 +158,16 @@ ${step.description.length > 200 ? step.description.substring(0, 200) + '...' : s
 ''';
 
       print('[GeminiService] Sending image generation request to Firebase AI');
-      final prompt = [Content.text(imagePrompt)];
-      final response = await _imageModel.generateContent(prompt);
+      
+      // Prepare content parts for image generation
+      List<Part> contentParts = [TextPart(imagePrompt)];
+      
+      // Add context image if provided
+      if (contextImageBytes != null) {
+        contentParts.add(InlineDataPart('image/jpeg', contextImageBytes));
+      }
+      
+      final response = await _imageModel.generateContent([Content.multi(contentParts)]);
       
       print('[GeminiService] Response received, checking for inline data parts');
       if (response.inlineDataParts.isNotEmpty) {
@@ -176,11 +192,12 @@ ${step.description.length > 200 ? step.description.substring(0, 200) + '...' : s
   Future<Tutorial> generateCompleteTutorial(String howToQuery, 
       Function(String)? onProgress, 
       {bool generateImages = true,
-      Function(int, String?)? onImageUpdate}) async {
+      Function(int, String?)? onImageUpdate,
+      Uint8List? imageBytes}) async {
     
     print('[GeminiService] Starting tutorial generation for: $howToQuery');
     onProgress?.call('Generating tutorial structure...');
-    final tutorial = await generateTutorial(howToQuery);
+    final tutorial = await generateTutorial(howToQuery, imageBytes: imageBytes);
     
     print('[GeminiService] Tutorial text generated with ${tutorial.steps.length} steps');
     // Return tutorial with text immediately
@@ -190,7 +207,7 @@ ${step.description.length > 200 ? step.description.substring(0, 200) + '...' : s
       print('[GeminiService] Starting async image generation');
       // Generate images asynchronously after returning the tutorial
       // Important: We don't await this, so the tutorial returns immediately
-      _generateImagesAsync(tutorial, onProgress, onImageUpdate).then((_) {
+      _generateImagesAsync(tutorial, onProgress, onImageUpdate, imageBytes).then((_) {
         print('[GeminiService] All images generation completed');
       }).catchError((error) {
         print('[GeminiService] Error in async image generation: $error');
@@ -204,7 +221,8 @@ ${step.description.length > 200 ? step.description.substring(0, 200) + '...' : s
   
   Future<void> _generateImagesAsync(Tutorial tutorial, 
       Function(String)? onProgress,
-      Function(int, String?)? onImageUpdate) async {
+      Function(int, String?)? onImageUpdate,
+      Uint8List? contextImageBytes) async {
     
     print('[GeminiService] _generateImagesAsync started for ${tutorial.steps.length} steps');
     
@@ -216,7 +234,7 @@ ${step.description.length > 200 ? step.description.substring(0, 200) + '...' : s
       try {
         // Generate image for this step
         print('[GeminiService] Calling generateStepImage for step ${i + 1}');
-        final imageBytes = await generateStepImage(step, null);
+        final imageBytes = await generateStepImage(step, null, contextImageBytes: contextImageBytes);
         
         print('[GeminiService] Image bytes received: ${imageBytes.length} bytes');
         // Convert to base64 data URL

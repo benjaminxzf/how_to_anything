@@ -45,6 +45,14 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     'how to unclog a sink',
     'how to brew perfect coffee',
     'how to write a resume',
+    'how to change a tire',
+    'how to cook scrambled eggs',
+    'how to tie a tie',
+    'how to fold a fitted sheet',
+    'how to jump start a car',
+    'how to plant a garden',
+    'how to iron a shirt',
+    'how to parallel park',
   ];
   String _displayedSuggestion = '';
   int _suggestionIndex = 0;

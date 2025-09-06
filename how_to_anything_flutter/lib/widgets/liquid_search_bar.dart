@@ -183,7 +183,7 @@ class _LiquidSearchBarState extends State<LiquidSearchBar>
               child: Column(
                 children: [
                   Text(
-                    'Add Image to Tutorial',
+                    'Add Image',
                     style: TextStyle(
                       color: Colors.white.withOpacity(0.9),
                       fontSize: 18,
@@ -478,7 +478,7 @@ class _LiquidSearchBarState extends State<LiquidSearchBar>
                                     color: _selectedImageBytes != null 
                                         ? Colors.cyan.withOpacity(0.8)
                                         : Colors.white.withOpacity(0.4),
-                                    size: 18,
+                                    size: 24,
                                   ),
                                   padding: EdgeInsets.zero,
                                   constraints: BoxConstraints(
@@ -499,7 +499,7 @@ class _LiquidSearchBarState extends State<LiquidSearchBar>
                                   icon: Icon(
                                     _isFocused ? Icons.search : Icons.arrow_forward,
                                     color: Colors.white.withOpacity(0.6),
-                                    size: 18,
+                                    size: 24,
                                   ),
                                   padding: EdgeInsets.zero,
                                   constraints: BoxConstraints(

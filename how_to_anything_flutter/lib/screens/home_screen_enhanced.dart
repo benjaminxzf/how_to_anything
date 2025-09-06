@@ -271,25 +271,117 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   ),
                 ),
                 
-                // Main content (stable positioning)
-                Center(
+                // Main content with parallax
+                AnimatedBuilder(
+                  animation: Listenable.merge([
+                    _parallaxAnimation,
+                    _floatAnimation,
+                  ]),
+                  builder: (context, child) {
+                    return Transform.translate(
+                      offset: Offset(
+                        _parallaxAnimation.value.dx * 50,
+                        _parallaxAnimation.value.dy * 50 + _floatAnimation.value,
+                      ),
+                      child: Center(
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            // Static title
-                            AnimatedOpacity(
-                              opacity: _searchFocusNode.hasFocus ? 0.3 : 1.0,
-                              duration: const Duration(milliseconds: 300),
-                              child: const Text(
-                                'How to Anything',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 44,
-                                  fontWeight: FontWeight.w600,
-                                  letterSpacing: 0.5,
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
+                            // Morphing title with glitch effect
+                            AnimatedBuilder(
+                              animation: Listenable.merge([
+                                _titleAnimation,
+                                _glitchAnimation,
+                                _morphAnimation,
+                                _searchFocusNode,
+                              ]),
+                              builder: (context, child) {
+                                final glitchOffset = math.sin(_glitchAnimation.value * math.pi * 10) * 2;
+                                final morphScale = 1.0 + math.sin(_morphAnimation.value * math.pi * 2) * 0.05;
+                                
+                                return Transform(
+                                  transform: Matrix4.identity()
+                                    ..setEntry(3, 2, 0.001)
+                                    ..rotateX(_titleAnimation.value * 0.02)
+                                    ..rotateY(math.sin(_glitchAnimation.value * math.pi * 2) * 0.01)
+                                    ..scale(
+                                      morphScale * (0.8 + _titleAnimation.value * 0.2),
+                                      morphScale * (0.8 + _titleAnimation.value * 0.2),
+                                    )
+                                    ..translate(glitchOffset, 0),
+                                  alignment: Alignment.center,
+                                  child: Stack(
+                                    children: [
+                                      // Glitch layers
+                                      if (_glitchAnimation.value > 0.95)
+                                        Transform.translate(
+                                          offset: const Offset(-2, -2),
+                                          child: Text(
+                                            'How to Anything',
+                                            style: TextStyle(
+                                              color: Colors.red.withOpacity(0.3),
+                                              fontSize: 44 + _titleAnimation.value * 4,
+                                              fontWeight: FontWeight.w600,
+                                              letterSpacing: 0.5 + _titleAnimation.value * 2,
+                                            ),
+                                            textAlign: TextAlign.center,
+                                          ),
+                                        ),
+                                      if (_glitchAnimation.value > 0.95)
+                                        Transform.translate(
+                                          offset: const Offset(2, 2),
+                                          child: Text(
+                                            'How to Anything',
+                                            style: TextStyle(
+                                              color: Colors.blue.withOpacity(0.3),
+                                              fontSize: 44 + _titleAnimation.value * 4,
+                                              fontWeight: FontWeight.w600,
+                                              letterSpacing: 0.5 + _titleAnimation.value * 2,
+                                            ),
+                                            textAlign: TextAlign.center,
+                                          ),
+                                        ),
+                                      // Main title with gradient
+                                      ShaderMask(
+                                        shaderCallback: (bounds) {
+                                          return LinearGradient(
+                                            begin: Alignment(
+                                              -1 + _morphAnimation.value * 2,
+                                              0,
+                                            ),
+                                            end: Alignment(
+                                              0 + _morphAnimation.value * 2,
+                                              0,
+                                            ),
+                                            colors: [
+                                              Colors.purple,
+                                              Colors.cyan,
+                                              Colors.white,
+                                              Colors.cyan,
+                                              Colors.purple,
+                                            ],
+                                            stops: const [0.0, 0.25, 0.5, 0.75, 1.0],
+                                          ).createShader(bounds);
+                                        },
+                                        child: AnimatedOpacity(
+                                          opacity: _searchFocusNode.hasFocus ? 0.3 : 1.0,
+                                          duration: const Duration(milliseconds: 300),
+                                          child: Text(
+                                            'How to Anything',
+                                            style: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 44 + _titleAnimation.value * 4,
+                                              fontWeight: FontWeight.w600,
+                                              letterSpacing: 0.5 + _titleAnimation.value * 2,
+                                            ),
+                                            textAlign: TextAlign.center,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              },
                             ),
                             
                             const SizedBox(height: 40),
@@ -353,6 +445,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                           ],
                         ),
                       ),
+                    );
+                  },
+                ),
                 
                 // Floating settings button with morphing animation
                 Positioned(

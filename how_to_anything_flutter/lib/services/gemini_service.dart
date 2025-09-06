@@ -17,7 +17,8 @@ class GeminiService {
     _textModel = FirebaseAI.googleAI().generativeModel(
       model: 'gemini-2.5-flash',
       generationConfig: GenerationConfig(
-        temperature: 0.7,
+        // Lower temperature for tighter, more concise wording
+        temperature: 0.3,
       ),
     );
     
@@ -35,70 +36,66 @@ class GeminiService {
     final prompt = '''
 Create a concise, practical tutorial for: "$howToQuery"
 
-Please respond with a valid JSON object that matches this exact schema:
+Return ONLY a valid JSON object that matches this schema exactly:
 {
-  "title": "string",
-  "description": "string", 
+  "title": "string",                  // <= 8 words
+  "description": "string",            // <= 20 words
   "difficulty": "Easy|Medium|Hard",
   "total_time": "string",
-  "tools_required": ["string"],
+  "tools_required": ["string"],       // essentials only
   "steps": [
     {
       "step_number": 1,
-      "title": "string",
-      "description": "string",
-      "tips": ["string"],
-      "warnings": ["string"],
-      "tools_needed": ["string"],
+      "title": "string",              // <= 8 words
+      "description": "string",        // 1–2 short sentences, <= 35 words total
+      "tips": ["string"],             // max 2 items, each <= 10 words
+      "warnings": ["string"],         // max 2 items, each <= 10 words
+      "tools_needed": ["string"],     // essentials only
       "estimated_time": "string",
-      "image_prompt": "string"
+      "image_prompt": "string"        // photorealistic instruction; no text in image
     }
   ],
-  "safety_notes": ["string"]
+  "safety_notes": ["string"]          // max 2 items, each <= 12 words
 }
 
-Guidelines:
-- Create tutorials with EXACTLY 2 steps for optimal mobile viewing experience
-- Make each step substantial, detailed and actionable - combine multiple actions if needed
-- Include specific measurements, times, and techniques where applicable
-- Add helpful tips and safety warnings for each step
-- For each step, create a detailed image prompt that describes a photorealistic 
-  instructional photo that would help someone complete that step
-- Image prompts should maintain consistency in setting, lighting, and style
-- Focus on the most essential actions - break complex tasks into 2 main phases
-- Image prompts should specify NO TEXT or words should appear in the generated image
-- Return ONLY the JSON object, no additional text
+Style and content rules:
+- EXACTLY 2 steps. Combine actions to fit two phases.
+- Be brief and specific. Use imperative voice. No fluff or repetition.
+- Prefer numbers and units (e.g., 12 in, 2–3 min).
+- Keep step descriptions to 1–2 short sentences.
+- Tips/Warnings: at most 2 concise bullets each (can be empty arrays).
+- Image prompts: photorealistic, consistent setting/lighting, NO TEXT or letters.
 
-Example for "how to tie a tie":
+Concise example (for "how to tie a tie"):
 {
-  "title": "How to Tie a Classic Four-in-Hand Tie",
-  "description": "Learn to tie a professional-looking tie knot in 2 simple steps",
+  "title": "Tie a Four-in-Hand Knot",
+  "description": "Make a neat classic knot in two steps.",
   "difficulty": "Easy",
-  "total_time": "2-3 minutes",
+  "total_time": "2–3 min",
   "tools_required": ["Necktie", "Mirror"],
   "steps": [
     {
       "step_number": 1,
-      "title": "Position and cross the tie",
-      "description": "Drape the tie around your neck with collar up, wide end 12 inches lower on your right. Cross the wide end over the narrow end near your collar, creating an X-shape. Hold this crossing point firmly with your non-dominant hand.",
-      "tips": ["Keep the wide end on your right side", "The crossing should be close to your neck", "Maintain firm grip on the crossing point"],
-      "warnings": ["Don't make the wide end too short or you won't complete the knot"],
+      "title": "Position and cross",
+      "description": "Drape tie, wide end 12 in lower right. Cross wide over narrow at collar.",
+      "tips": ["Keep cross close to neck", "Hold the crossing point"],
+      "warnings": ["Don't start with short wide end"],
       "tools_needed": ["Necktie"],
-      "estimated_time": "30 seconds",
-      "image_prompt": "Professional man in white dress shirt at mirror, hands positioned crossing a navy silk tie near his collar, wide end over narrow end forming X-shape, focused on hand positioning"
+      "estimated_time": "30 sec",
+      "image_prompt": "Close-up at mirror: hands crossing a navy tie near collar, wide over narrow, white shirt, soft studio lighting, no text"
     },
     {
       "step_number": 2,
-      "title": "Form and tighten the knot",
-      "description": "Wrap the wide end behind and around the narrow end, then pull it up through the neck loop from underneath. Pull the wide end down through the front loop you just created, then slide the knot up by pulling the narrow end while holding the knot.",
-      "tips": ["Keep movements smooth and controlled", "Adjust knot position by sliding up or down", "The wide end should reach your belt buckle"],
-      "warnings": ["Don't pull too hard or the knot will become too tight"],
+      "title": "Form and tighten",
+      "description": "Wrap wide end around, up through neck loop, then down through front loop. Slide knot up while holding.",
+      "tips": ["Adjust to belt line"],
+      "warnings": ["Don't over-tighten"],
       "tools_needed": ["Necktie"],
-      "estimated_time": "60 seconds",
-      "image_prompt": "Close-up of hands completing a tie knot, pulling wide end through the front loop, navy silk tie against white dress shirt, professional lighting showing knot formation detail"
+      "estimated_time": "60 sec",
+      "image_prompt": "Hands pulling wide end through front loop, knot forming; white shirt, clear lighting; photoreal; no text"
     }
   ],
-  "safety_notes": ["Avoid tying the knot too tightly to prevent discomfort"]
+  "safety_notes": ["Avoid over-tightening to prevent discomfort"]
 }
 ''';
 

@@ -366,7 +366,10 @@ class _LiquidSearchBarState extends State<LiquidSearchBar>
           builder: (context, child) {
             return Container(
               width: containerWidth,
-              height: 60,
+              constraints: BoxConstraints(
+                minHeight: 60,
+                maxHeight: 200,
+              ),
               child: CustomPaint(
                 painter: LiquidPainter(
                   morphProgress: _morphAnimation.value,
@@ -397,9 +400,11 @@ class _LiquidSearchBarState extends State<LiquidSearchBar>
                           width: 1,
                         ),
                       ),
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                      child: Row(
-                        children: [
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                      child: IntrinsicHeight(
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
                           if (_selectedImageBytes != null)
                             AnimatedBuilder(
                               animation: _imageAnimation,
@@ -432,6 +437,10 @@ class _LiquidSearchBarState extends State<LiquidSearchBar>
                             child: TextField(
                               controller: widget.controller,
                               focusNode: widget.focusNode,
+                              maxLines: null,
+                              minLines: 1,
+                              keyboardType: TextInputType.multiline,
+                              textInputAction: TextInputAction.newline,
                               style: TextStyle(
                                 color: Colors.white.withOpacity(0.9),
                                 fontSize: 18,
@@ -455,41 +464,54 @@ class _LiquidSearchBarState extends State<LiquidSearchBar>
                                   fontWeight: FontWeight.w300,
                                 ),
                               ),
-                              textInputAction: TextInputAction.search,
-                              onSubmitted: (_) => widget.onSearch(),
                             ),
                           ),
                           SizedBox(
-                            width: 48,
-                            height: 60,
-                            child: IconButton(
-                              onPressed: _showImagePickerDialog,
-                              icon: Icon(
-                                Icons.image,
-                                color: _selectedImageBytes != null 
-                                    ? Colors.cyan.withOpacity(0.8)
-                                    : Colors.white.withOpacity(0.4),
-                                size: 20,
-                              ),
-                              padding: EdgeInsets.zero,
-                              alignment: Alignment.center,
+                            width: 24,
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                IconButton(
+                                  onPressed: _showImagePickerDialog,
+                                  icon: Icon(
+                                    Icons.image,
+                                    color: _selectedImageBytes != null 
+                                        ? Colors.cyan.withOpacity(0.8)
+                                        : Colors.white.withOpacity(0.4),
+                                    size: 18,
+                                  ),
+                                  padding: EdgeInsets.zero,
+                                  constraints: BoxConstraints(
+                                    minHeight: 24,
+                                    minWidth: 24,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                           SizedBox(
-                            width: 48,
-                            height: 60,
-                            child: IconButton(
-                              onPressed: widget.onSearch,
-                              icon: Icon(
-                                _isFocused ? Icons.search : Icons.arrow_forward,
-                                color: Colors.white.withOpacity(0.6),
-                                size: 20,
-                              ),
-                              padding: EdgeInsets.zero,
-                              alignment: Alignment.center,
+                            width: 24,
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                IconButton(
+                                  onPressed: widget.onSearch,
+                                  icon: Icon(
+                                    _isFocused ? Icons.search : Icons.arrow_forward,
+                                    color: Colors.white.withOpacity(0.6),
+                                    size: 18,
+                                  ),
+                                  padding: EdgeInsets.zero,
+                                  constraints: BoxConstraints(
+                                    minHeight: 24,
+                                    minWidth: 24,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   ),

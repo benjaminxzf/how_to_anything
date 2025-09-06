@@ -20,6 +20,7 @@ class _TutorialGenerationOverlayState extends State<TutorialGenerationOverlay>
   late AnimationController _pulseController;
   late Animation<double> _shimmerAnimation;
   late Animation<double> _pulseAnimation;
+  final List<double> _chipWidths = <double>[];
 
   @override
   void initState() {
@@ -49,6 +50,13 @@ class _TutorialGenerationOverlayState extends State<TutorialGenerationOverlay>
       parent: _pulseController,
       curve: Curves.easeInOut,
     ));
+
+    // Precompute stable widths for ghost chips to prevent jitter
+    final seeded = math.Random(42);
+    _chipWidths.clear();
+    for (int i = 0; i < 3; i++) {
+      _chipWidths.add(50 + (seeded.nextDouble() * 30));
+    }
   }
 
   @override
@@ -263,7 +271,7 @@ class _TutorialGenerationOverlayState extends State<TutorialGenerationOverlay>
           alignment: WrapAlignment.center,
           spacing: 10,
           runSpacing: 10,
-          children: List.generate(3, (_) => _buildGhostChip()),
+          children: List.generate(3, (i) => _buildGhostChip(width: _chipWidths[i])),
         ),
       ],
     );
@@ -374,7 +382,7 @@ class _TutorialGenerationOverlayState extends State<TutorialGenerationOverlay>
     );
   }
 
-  Widget _buildGhostChip() {
+  Widget _buildGhostChip({required double width}) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
@@ -386,7 +394,7 @@ class _TutorialGenerationOverlayState extends State<TutorialGenerationOverlay>
         ),
       ),
       child: SizedBox(
-        width: 50 + (math.Random().nextDouble() * 30),
+        width: width,
         height: 10,
       ),
     );

@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'dart:async';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -23,6 +24,19 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   bool _isHovering = false;
   bool _generateImages = true;
 
+  // Typing guidance state
+  final List<String> _suggestions = const [
+    'how to fix a dead car battery',
+    'how to unclog a sink',
+    'how to brew perfect coffee',
+    'how to write a resume',
+  ];
+  String _displayedSuggestion = '';
+  int _suggestionIndex = 0;
+  int _charIndex = 0;
+  bool _isDeletingSuggestion = false;
+  Timer? _typingTimer;
+
   @override
   void initState() {
     super.initState();
@@ -43,6 +57,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       parent: _glowController,
       curve: Curves.easeInOut,
     ));
+
+    _startTypingGuidance();
   }
 
   @override
@@ -51,6 +67,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     _searchFocusNode.dispose();
     _glowController.dispose();
     _particleController.dispose();
+    _typingTimer?.cancel();
     super.dispose();
   }
 
@@ -64,8 +81,91 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     }
   }
 
+  // Typing guidance logic
+  void _startTypingGuidance() {
+    _typingTimer?.cancel();
+    _scheduleNextTick(const Duration(milliseconds: 500));
+  }
+
+  void _scheduleNextTick([Duration? delay]) {
+    _typingTimer?.cancel();
+    _typingTimer = Timer(delay ?? const Duration(milliseconds: 80), _tickTypingGuidance);
+  }
+
+  void _tickTypingGuidance() {
+    if (!mounted) return;
+    final current = _suggestions[_suggestionIndex % _suggestions.length];
+
+    setState(() {
+      if (!_isDeletingSuggestion) {
+        // Typing forward
+        if (_charIndex < current.length) {
+          _charIndex++;
+          _displayedSuggestion = current.substring(0, _charIndex);
+          _scheduleNextTick(const Duration(milliseconds: 70));
+        } else {
+          // Hold before deleting
+          _isDeletingSuggestion = true;
+          _scheduleNextTick(const Duration(milliseconds: 1200));
+        }
+      } else {
+        // Deleting backward
+        if (_charIndex > 0) {
+          _charIndex--;
+          _displayedSuggestion = current.substring(0, _charIndex);
+          _scheduleNextTick(const Duration(milliseconds: 35));
+        } else {
+          // Move to next suggestion
+          _isDeletingSuggestion = false;
+          _suggestionIndex = (_suggestionIndex + 1) % _suggestions.length;
+          _scheduleNextTick(const Duration(milliseconds: 500));
+        }
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final double inputFontSize = screenWidth < 360
+        ? 14
+        : (screenWidth < 480
+            ? 16
+            : (screenWidth < 720
+                ? 18
+                : 20));
+    final double hPad = screenWidth < 360
+        ? 16
+        : (screenWidth < 480
+            ? 20
+            : (screenWidth < 720
+                ? 24
+                : 30));
+    final double vPad = screenWidth < 360
+        ? 12
+        : (screenWidth < 480
+            ? 14
+            : (screenWidth < 720
+                ? 16
+                : 20));
+    final double arrowIconSize = screenWidth < 360
+        ? 18
+        : (screenWidth < 480
+            ? 20
+            : (screenWidth < 720
+                ? 22
+                : 24));
+    final double radius = screenWidth < 360
+        ? 22
+        : (screenWidth < 480
+            ? 26
+            : 30);
+    final double widthFactor = screenWidth < 360
+        ? 0.94
+        : (screenWidth < 480
+            ? 0.9
+            : 0.85);
+
     return Scaffold(
       backgroundColor: const Color(0xFF0A0A0F),
       body: Consumer<TutorialProvider>(
@@ -111,9 +211,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         animation: _glowAnimation,
                         builder: (context, child) {
                           return Container(
-                            width: math.min(600, MediaQuery.of(context).size.width * 0.85),
+                            width: math.min(600, screenWidth * widthFactor),
                             decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(30),
+                              borderRadius: BorderRadius.circular(radius),
                               boxShadow: [
                                 BoxShadow(
                                   color: const Color(0xFF00D9FF).withOpacity(_glowAnimation.value * 0.3),
@@ -123,14 +223,14 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                               ],
                             ),
                             child: ClipRRect(
-                              borderRadius: BorderRadius.circular(30),
+                              borderRadius: BorderRadius.circular(radius),
                               child: BackdropFilter(
                                 filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
                                 child: Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
+                                  padding: EdgeInsets.symmetric(horizontal: hPad, vertical: vPad),
                                   decoration: BoxDecoration(
                                     color: Colors.white.withOpacity(0.05),
-                                    borderRadius: BorderRadius.circular(30),
+                                    borderRadius: BorderRadius.circular(radius),
                                     border: Border.all(
                                       color: Colors.white.withOpacity(0.1),
                                       width: 1,
@@ -139,33 +239,68 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                   child: Row(
                                     children: [
                                       Expanded(
-                                        child: TextField(
-                                          controller: _searchController,
-                                          focusNode: _searchFocusNode,
-                                          style: const TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.w300,
-                                          ),
-                                          cursorColor: Colors.cyan,
-                                          decoration: const InputDecoration(
-                                            hintText: 'What would you like to learn?',
-                                            hintStyle: TextStyle(
-                                              color: Colors.white30,
-                                              fontSize: 18,
-                                              fontWeight: FontWeight.w300,
+                                        child: Stack(
+                                          alignment: Alignment.centerLeft,
+                                          children: [
+                                            // Real input
+                                            TextField(
+                                              controller: _searchController,
+                                              focusNode: _searchFocusNode,
+                                              style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: inputFontSize,
+                                                fontWeight: FontWeight.w300,
+                                              ),
+                                              cursorColor: Colors.cyan,
+                                              decoration: const InputDecoration(
+                                                border: InputBorder.none,
+                                                focusedBorder: InputBorder.none,
+                                                enabledBorder: InputBorder.none,
+                                                errorBorder: InputBorder.none,
+                                                disabledBorder: InputBorder.none,
+                                                filled: false,
+                                                isDense: true,
+                                                contentPadding: EdgeInsets.zero,
+                                              ),
+                                              textInputAction: TextInputAction.search,
+                                              onSubmitted: (_) => _handleSearch(),
                                             ),
-                                            border: InputBorder.none,
-                                            focusedBorder: InputBorder.none,
-                                            enabledBorder: InputBorder.none,
-                                            errorBorder: InputBorder.none,
-                                            disabledBorder: InputBorder.none,
-                                            filled: false,
-                                            isDense: true,
-                                            contentPadding: EdgeInsets.zero,
-                                          ),
-                                          textInputAction: TextInputAction.search,
-                                          onSubmitted: (_) => _handleSearch(),
+                                            // Typing guidance overlay (shows only when empty & unfocused)
+                                            if (!_searchFocusNode.hasFocus && _searchController.text.isEmpty)
+                                              IgnorePointer(
+                                                child: AnimatedOpacity(
+                                                  opacity: 0.35,
+                                                  duration: const Duration(milliseconds: 250),
+                                                  child: Row(
+                                                    mainAxisSize: MainAxisSize.min,
+                                                    children: [
+                                                      Flexible(
+                                                        child: Text(
+                                                          _displayedSuggestion,
+                                                          maxLines: 1,
+                                                          overflow: TextOverflow.clip,
+                                                          style: TextStyle(
+                                                            color: Colors.white,
+                                                            fontSize: inputFontSize,
+                                                            fontWeight: FontWeight.w300,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                      // Subtle blinking caret
+                                                      Container(
+                                                        width: 2,
+                                                        height: inputFontSize,
+                                                        margin: const EdgeInsets.only(left: 2),
+                                                        color: Colors.white.withOpacity(((((
+                                                                  _glowAnimation.value - 0.5) * 2)
+                                                              .clamp(0.0, 1.0)) as num)
+                                                              .toDouble()),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ),
+                                          ],
                                         ),
                                       ),
                                       AnimatedContainer(
@@ -176,7 +311,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                             Icons.arrow_forward,
                                             color: Colors.white.withOpacity(_isHovering ? 0.8 : 0.3),
                                           ),
-                                          splashRadius: 20,
+                                          iconSize: arrowIconSize,
+                                          splashRadius: arrowIconSize + 4,
                                         ),
                                       ),
                                     ],

@@ -1,115 +1,112 @@
-# How To Anything - Flutter App
+# How To Anything — Flutter App
 
-A modern Flutter application that generates AI-powered step-by-step tutorials with interactive swipeable cards. Built with Firebase AI (Gemini 2.5) for intelligent content generation.
+An interactive Flutter app that generates step‑by‑step “how to” tutorials using Google Gemini. It features a liquid search bar with optional image context, beautiful swipeable cards, and real‑time progress as images generate asynchronously.
 
-![Flutter](https://img.shields.io/badge/Flutter-3.32.8-blue.svg)
-![Firebase](https://img.shields.io/badge/Firebase-AI-orange.svg)
-![Platform](https://img.shields.io/badge/Platform-Web%20%7C%20Android-lightgrey.svg)
+Badges: Web | Android (iOS configuration WIP)
 
-## ✨ Features
+## Highlights
 
-- **🔍 Search Interface**: Clean, intuitive search bar inspired by modern design patterns
-- **🤖 AI-Powered Content**: Uses Gemini 2.5 Flash for intelligent tutorial generation
-- **📱 Swipeable Cards**: Interactive tutorial steps with smooth card transitions
-- **🎨 Modern UI**: Material Design 3 with beautiful gradients and animations
-- **🔊 Audio Integration**: Ready for voice narration (TTS integration planned)
-- **🖼️ Image Support**: Prepared for AI-generated step images
-- **📊 Progress Tracking**: Visual progress indicators and step navigation
-- **⚡ Real-time Generation**: Live progress updates during content creation
-- **🌐 Cross-Platform**: Runs on web and Android with responsive design
+- Query + optional image context (camera/gallery)
+- AI tutorial generation via Gemini 2.5 Flash (text)
+- Step images via Gemini 2.5 Flash Image Preview (async, per‑step)
+- Smooth swipeable UI with particle background and custom animations
+- Provider state management with progress and error overlays
+- Audio playback plumbing present; TTS generation not implemented yet
 
-## 🏗️ Architecture
+## Architecture & Flow
+
+- Entry point: `lib/main.dart`
+  - Loads `.env` using `flutter_dotenv` (expects `GEMINI_API_KEY`).
+  - Initializes Firebase with `firebase_options.dart` (web/android configured; iOS placeholders).
+  - Sets up `ChangeNotifierProvider<TutorialProvider>` and routes to `HomeScreen`.
+
+- State: `lib/services/tutorial_provider.dart`
+  - States: `idle | loading | completed | error` with progress text.
+  - Orchestrates generation via `GeminiService.generateCompleteTutorial(...)`.
+  - Returns tutorial immediately, then generates step images asynchronously.
+  - Updates each step’s `imageUrl` via `onImageUpdate` and notifies listeners.
+
+- Service: `lib/services/gemini_service.dart`
+  - Text generation: `POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent`.
+  - Image generation: `POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image-preview:generateContent`.
+  - Accepts optional inline image context; cleans LLM output (strips code fences) and enforces JSON schema.
+  - Web compatibility: deep‑converts IdentityMap to standard Map.
+  - TTS method is stubbed; not implemented.
+
+- UI
+  - `HomeScreen`: liquid search bar (`widgets/liquid_search_bar.dart`) with camera/gallery using `image_picker`, animated background (`widgets/particle_field.dart`), generation overlay, and error overlay.
+  - `TutorialScreen`: `card_swiper`‑based overview + per‑step cards (`widgets/tutorial_overview_card.dart`, `widgets/tutorial_step_card.dart`). Each step shows loading placeholder until its image arrives.
 
 ### Project Structure
 ```
 lib/
-├── models/              # Data models for Tutorial and TutorialStep
+├── main.dart
+├── firebase_options.dart
+├── models/
 │   ├── tutorial.dart
 │   ├── tutorial.g.dart
 │   ├── tutorial_step.dart
 │   └── tutorial_step.g.dart
-├── screens/             # Main application screens
+├── screens/
 │   ├── home_screen.dart
 │   └── tutorial_screen.dart
-├── services/            # Business logic and API integration
+├── services/
 │   ├── gemini_service.dart
 │   └── tutorial_provider.dart
-├── widgets/             # Reusable UI components
-│   ├── tutorial_generation_overlay.dart
-│   ├── tutorial_header.dart
-│   ├── tutorial_step_card.dart
-│   └── step_indicator.dart
-├── firebase_options.dart
-└── main.dart
+├── utils/
+│   └── animation_utils.dart
+└── widgets/
+    ├── liquid_search_bar.dart
+    ├── particle_field.dart
+    ├── tutorial_generation_overlay.dart
+    ├── tutorial_header.dart
+    ├── tutorial_overview_card.dart
+    ├── tutorial_step_card.dart
+    └── step_indicator.dart
 ```
 
-### Key Components
+## Setup
 
-#### 🧠 GeminiService
-- Firebase AI integration for text generation
-- JSON schema validation for consistent output
-- Error handling and response parsing
-- Ready for image and audio generation
+Prerequisites
+- Flutter (stable channel)
+- Dart SDK >= 3.8 (pubspec `environment: sdk: ^3.8.1`)
+- Google AI Studio API key (Generative Language API)
 
-#### 🎯 TutorialProvider  
-- State management using Provider pattern
-- Loading states and progress tracking
-- Error handling with user-friendly messages
+1) Install dependencies
+```bash
+cd how_to_anything_flutter
+flutter pub get
+```
 
-#### 🎨 UI Components
-- **HomeScreen**: Search interface with gradient background
-- **TutorialScreen**: Swipeable cards with navigation controls
-- **TutorialStepCard**: Rich content display with tips and warnings
-- **Custom Overlays**: Loading and error state management
+2) Environment variables
+Create `.env` in this folder and add:
+```env
+GEMINI_API_KEY=your_api_key
+```
+Note: `.env` is git‑ignored but must exist at build time (it’s declared under `flutter/assets`).
 
-## 🚀 Getting Started
+3) Firebase config
+- `firebase_options.dart` contains working web/android config for a sample project. Replace with your own using FlutterFire CLI for production.
+- iOS/macOS/windows have placeholder values — configure before targeting those platforms.
 
-### Prerequisites
+4) Generate JSON serialization code (if edited)
+```bash
+dart run build_runner build
+```
 
-- Flutter SDK 3.32.8+
-- Firebase project with AI services enabled
-- Dart SDK 3.8.1+
+## Run
 
-### Installation
-
-1. **Clone the repository**
-   ```bash
-   git clone <your-repo-url>
-   cd how_to_anything_flutter
-   ```
-
-2. **Install dependencies**
-   ```bash
-   flutter pub get
-   ```
-
-3. **Set up environment variables**
-   Create a `.env` file in the root directory:
-   ```env
-   GEMINI_API_KEY=your_gemini_api_key_here
-   ```
-
-4. **Configure Firebase** (if needed)
-   Update `firebase_options.dart` with your Firebase project configuration
-
-5. **Generate model files**
-   ```bash
-   dart run build_runner build
-   ```
-
-### Running the App
-
-#### Web Development
+Web
 ```bash
 flutter run -d chrome
 ```
 
-#### Android Development  
+Android
 ```bash
 flutter run -d android
 ```
 
-#### Production Build
+Build
 ```bash
 # Web
 flutter build web --release
@@ -118,106 +115,68 @@ flutter build web --release
 flutter build apk --release
 ```
 
-## 🎯 Usage
+Platform notes
+- Android: `image_picker` handles camera/gallery; ensure camera permission is allowed. If needed, add `<uses-permission android:name="android.permission.CAMERA" />`.
+- iOS: Add proper Firebase options and `NSCameraUsageDescription` for camera.
 
-1. **Launch the app** - You'll see the beautiful search interface
-2. **Enter a query** - Type "how to..." followed by what you want to learn
-3. **Wait for generation** - AI creates a comprehensive tutorial in real-time
-4. **Navigate the tutorial** - Swipe through interactive cards with rich content
-5. **Complete the tutorial** - Track your progress and celebrate completion!
+## Usage
 
-### Example Queries
-- "how to tie a tie"
-- "how to make coffee"  
-- "how to change a tire"
-- "how to fold origami"
-- "how to cook pasta"
+- Enter a query like “how to tie a tie”.
+- Optionally add a photo to guide the model.
+- Text tutorial appears quickly; step images load one by one.
+- Swipe through steps; tools/tips/warnings show per card.
 
-## 🔧 Configuration
+## Configuration
 
-### Firebase AI Setup
-The app uses Firebase AI for content generation. Make sure your Firebase project has:
-- Gemini API enabled
-- Proper authentication configured
-- API key with appropriate permissions
-
-### Environment Variables
-Add your API credentials to the `.env` file:
+Environment
 ```env
-GEMINI_API_KEY=AIzaSy...your_key_here
+GEMINI_API_KEY=...
 ```
 
-## 🎨 Customization
+Models used
+- Text: `gemini-2.5-flash`
+- Images: `gemini-2.5-flash-image-preview`
 
-### Theme Configuration
-The app uses Material Design 3 with a custom color scheme:
-- Primary: Indigo (#6366F1)  
-- Secondary: Violet (#8B5CF6)
-- Background gradients and animations
+Security
+- Don’t commit real API keys. Use environment variables and restrict keys in your Google Cloud project (HTTP referrers/package name/signing cert as appropriate).
 
-### Adding New Features
-1. **Custom Tutorial Types**: Extend the Tutorial model
-2. **New UI Components**: Add to the widgets directory
-3. **Additional Services**: Integrate with services directory
-4. **Platform Features**: Use platform-specific implementations
+## Dependencies (from pubspec)
 
-## 🧪 Testing
+- firebase_core: ^4.1.0
+- flutter_dotenv: ^5.1.0
+- http: ^1.1.0
+- provider: ^6.1.1
+- card_swiper: ^3.0.1
+- audioplayers: ^6.0.0
+- image_picker: ^1.0.4
+- cached_network_image: ^3.3.1
+- shimmer: ^3.0.0
+- json_annotation: ^4.8.1
+- material_color_utilities: ^0.11.1
+- dev: json_serializable ^6.7.1, build_runner ^2.4.7, flutter_lints
 
-```bash
-# Run all tests
-flutter test
+## Known Limitations
 
-# Run specific test
-flutter test test/widget_test.dart
-```
+- TTS is not implemented; audio buttons appear only if an `audioUrl` is present.
+- iOS/macOS/windows Firebase options are placeholders.
+- Web may be subject to CORS or API key restrictions depending on your Google Cloud settings.
+- Default widget test is boilerplate and doesn’t match `HowToAnythingApp` yet.
 
-## 📦 Dependencies
+## Troubleshooting
 
-### Core Dependencies
-- `firebase_core: ^3.9.0` - Firebase initialization
-- `firebase_ai: ^2.3.0` - AI services integration
-- `provider: ^6.1.1` - State management
-- `card_swiper: ^3.0.1` - Swipeable card interface
+- 401/403 from Gemini: verify `GEMINI_API_KEY` and API enablement.
+- JSON parse errors: the model sometimes returns fenced code; we strip backticks and parse again.
+- Images not loading: ensure the Image Preview model is enabled and quotas are available.
 
-### UI/UX Dependencies  
-- `shimmer: ^3.0.0` - Loading animations
-- `cached_network_image: ^3.3.1` - Image caching
-- `audioplayers: ^6.0.0` - Audio playback
+## Roadmap
 
-### Development Dependencies
-- `json_serializable: ^6.7.1` - Model serialization
-- `build_runner: ^2.4.7` - Code generation
+- Server‑side TTS generation and audio per step
+- Tutorial persistence/sharing
+- Offline save for tutorials
+- iOS/macOS/windows first‑class support
 
-## 🌟 Future Enhancements
+## Related
 
-- **🖼️ Image Generation**: AI-generated step images using Gemini 2.5 Flash Image
-- **🔊 Voice Narration**: Text-to-Speech integration with multiple voices
-- **💾 Offline Support**: Save tutorials for offline viewing
-- **👥 Social Features**: Share and rate tutorials
-- **🎯 Personalization**: Adaptive difficulty and custom preferences
-- **📊 Analytics**: Usage tracking and improvement insights
+- Python CLI generator lives in the repository root (`how_to_anything.py`). It produces JSON, images, audio, and an HTML viewer. The Flutter app generates tutorials live on device.
 
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🙏 Acknowledgments
-
-- **Google Gemini AI** for powerful content generation
-- **Firebase** for seamless backend integration  
-- **Flutter Team** for the amazing framework
-- **Material Design** for beautiful UI components
-
----
-
-**Built with ❤️ using Flutter and Firebase AI**
-
-For questions or support, please open an issue on GitHub.
+— Built with Flutter and Google Gemini

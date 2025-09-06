@@ -35,9 +35,8 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
   
-  # Firebase AI with proper project setup
+  # Firebase core still needed for other services
   firebase_core: ^4.1.0
-  firebase_ai: ^3.2.0
   
   # Environment variables
   flutter_dotenv: ^5.1.0

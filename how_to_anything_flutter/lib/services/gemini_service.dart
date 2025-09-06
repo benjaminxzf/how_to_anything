@@ -1,36 +1,28 @@
 import 'dart:convert';
 import 'dart:typed_data';
-import 'package:firebase_ai/firebase_ai.dart';
+import 'package:http/http.dart' as http;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../models/tutorial.dart';
 import '../models/tutorial_step.dart';
 
 class GeminiService {
-  late final GenerativeModel _textModel;
-  late final GenerativeModel _imageModel;
+  static const String _baseUrl = 'https://generativelanguage.googleapis.com/v1beta/models';
+  static const String _textModel = 'gemini-2.5-flash';
+  static const String _imageModel = 'gemini-2.5-flash-image-preview';
   
   static const List<String> _voices = [
     "Puck", "Charon", "Kore", "Fenrir", "Leda", "Zephyr", "Orus", "Aoede"
   ];
 
-  GeminiService() {
-    // Initialize text generation model with Firebase AI
-    _textModel = FirebaseAI.googleAI().generativeModel(
-      model: 'gemini-2.5-flash',
-      generationConfig: GenerationConfig(
-        // Lower temperature for tighter, more concise wording
-        temperature: 0.3,
-      ),
-    );
-    
-    // Initialize image generation model with Firebase AI
-    _imageModel = FirebaseAI.googleAI().generativeModel(
-      model: 'gemini-2.5-flash-image-preview',
-      generationConfig: GenerationConfig(
-        temperature: 0.7,
-        responseModalities: [ResponseModalities.text, ResponseModalities.image],
-      ),
-    );
+  String get _apiKey {
+    final key = dotenv.env['GEMINI_API_KEY'];
+    if (key == null || key.isEmpty) {
+      throw Exception('GEMINI_API_KEY not found in environment variables');
+    }
+    return key;
   }
+
+  GeminiService();
 
   Future<Tutorial> generateTutorial(String howToQuery, {Uint8List? imageBytes}) async {
     final prompt = '''
@@ -100,21 +92,58 @@ Concise example (for "how to tie a tie"):
 ''';
 
     try {
-      // Prepare content parts for the request
-      List<Part> contentParts = [TextPart(prompt)];
+      // Prepare request body
+      final Map<String, dynamic> requestBody = {
+        'contents': [
+          {
+            'parts': [
+              {'text': prompt}
+            ]
+          }
+        ]
+      };
       
       // Add image if provided
       if (imageBytes != null) {
-        contentParts.add(InlineDataPart('image/jpeg', imageBytes));
+        final imageBase64 = base64Encode(imageBytes);
+        requestBody['contents'][0]['parts'].add({
+          'inline_data': {
+            'mime_type': 'image/jpeg',
+            'data': imageBase64
+          }
+        });
       }
       
-      final response = await _textModel.generateContent([Content.multi(contentParts)]);
-      if (response.text == null || response.text!.isEmpty) {
+      final response = await http.post(
+        Uri.parse('$_baseUrl/$_textModel:generateContent'),
+        headers: {
+          'x-goog-api-key': _apiKey,
+          'Content-Type': 'application/json',
+        },
+        body: json.encode(requestBody),
+      );
+      
+      if (response.statusCode != 200) {
+        throw Exception('HTTP ${response.statusCode}: ${response.body}');
+      }
+      
+      final responseData = json.decode(response.body);
+      if (responseData['candidates'] == null || responseData['candidates'].isEmpty) {
+        throw Exception('No response text received from Gemini');
+      }
+      
+      final content = responseData['candidates'][0]['content'];
+      if (content == null || content['parts'] == null || content['parts'].isEmpty) {
+        throw Exception('No response text received from Gemini');
+      }
+      
+      final text = content['parts'][0]['text'];
+      if (text == null || text.isEmpty) {
         throw Exception('No response text received from Gemini');
       }
       
       // Clean the response to extract only JSON
-      String jsonText = response.text!.trim();
+      String jsonText = text.trim();
       
       // Remove any potential markdown formatting
       if (jsonText.startsWith('```json')) {
@@ -157,27 +186,70 @@ Additional context:
 ${step.description.length > 200 ? step.description.substring(0, 200) + '...' : step.description}
 ''';
 
-      print('[GeminiService] Sending image generation request to Firebase AI');
+      print('[GeminiService] Sending image generation request via HTTP');
       
-      // Prepare content parts for image generation
-      List<Part> contentParts = [TextPart(imagePrompt)];
+      // Prepare request body
+      final Map<String, dynamic> requestBody = {
+        'contents': [
+          {
+            'parts': [
+              {'text': imagePrompt}
+            ]
+          }
+        ]
+      };
       
       // Add context image if provided
       if (contextImageBytes != null) {
-        contentParts.add(InlineDataPart('image/jpeg', contextImageBytes));
+        final imageBase64 = base64Encode(contextImageBytes);
+        requestBody['contents'][0]['parts'].add({
+          'inline_data': {
+            'mime_type': 'image/jpeg',
+            'data': imageBase64
+          }
+        });
       }
       
-      final response = await _imageModel.generateContent([Content.multi(contentParts)]);
+      final response = await http.post(
+        Uri.parse('$_baseUrl/$_imageModel:generateContent'),
+        headers: {
+          'x-goog-api-key': _apiKey,
+          'Content-Type': 'application/json',
+        },
+        body: json.encode(requestBody),
+      );
       
-      print('[GeminiService] Response received, checking for inline data parts');
-      if (response.inlineDataParts.isNotEmpty) {
-        final bytes = response.inlineDataParts.first.bytes;
-        print('[GeminiService] Image generated successfully: ${bytes.length} bytes');
-        return bytes;
-      } else {
-        print('[GeminiService] ERROR: No inline data parts in response');
-        throw Exception('No images were generated for step ${step.stepNumber}');
+      if (response.statusCode != 200) {
+        throw Exception('HTTP ${response.statusCode}: ${response.body}');
       }
+      
+      final responseData = json.decode(response.body);
+      if (responseData['candidates'] == null || responseData['candidates'].isEmpty) {
+        throw Exception('No response received from Gemini');
+      }
+      
+      final content = responseData['candidates'][0]['content'];
+      if (content == null || content['parts'] == null || content['parts'].isEmpty) {
+        throw Exception('No response content received from Gemini');
+      }
+      
+      // Find the inline_data part containing the image
+      final parts = content['parts'] as List;
+      for (final part in parts) {
+        if (part is Map<String, dynamic> && part.containsKey('inlineData')) {
+          final inlineData = part['inlineData'];
+          if (inlineData != null && inlineData['data'] != null) {
+            final imageData = inlineData['data'] as String;
+            final bytes = base64Decode(imageData);
+            print('[GeminiService] Image generated successfully: ${bytes.length} bytes');
+            return bytes;
+          }
+        }
+      }
+      
+      print('[GeminiService] ERROR: No inline data parts in response');
+      print('[GeminiService] Available parts keys: ${parts.map((p) => (p as Map).keys.toList())}');
+      throw Exception('No images were generated for step ${step.stepNumber}');
     } catch (e) {
       throw Exception('Error generating image for step ${step.stepNumber}: $e');
     }
@@ -204,9 +276,6 @@ ${step.description.length > 200 ? step.description.substring(0, 200) + '...' : s
     onProgress?.call('Tutorial text ready! Loading images...');
     
     if (generateImages) {
-      print('[GeminiService] Image generation temporarily disabled to save API costs');
-      // TODO: Uncomment below lines to re-enable image generation
-      /*
       print('[GeminiService] Starting async image generation');
       // Generate images asynchronously after returning the tutorial
       // Important: We don't await this, so the tutorial returns immediately
@@ -215,7 +284,6 @@ ${step.description.length > 200 ? step.description.substring(0, 200) + '...' : s
       }).catchError((error) {
         print('[GeminiService] Error in async image generation: $error');
       });
-      */
     } else {
       print('[GeminiService] Image generation disabled');
     }

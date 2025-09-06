@@ -59,7 +59,7 @@ Return ONLY a valid JSON object that matches this schema exactly:
 }
 
 Style and content rules:
-- EXACTLY 2 steps. Combine actions to fit two phases.
+- Between 2-10 steps depending on complexity. Break down complex tasks appropriately.
 - Be brief and specific. Use imperative voice. No fluff or repetition.
 - Prefer numbers and units (e.g., 12 in, 2–3 min).
 - Keep step descriptions to 1–2 short sentences.
@@ -196,7 +196,7 @@ ${step.description.length > 200 ? step.description.substring(0, 200) + '...' : s
       Uint8List? imageBytes}) async {
     
     print('[GeminiService] Starting tutorial generation for: $howToQuery');
-    onProgress?.call('Generating tutorial structure...');
+    onProgress?.call('Figuring out how to $howToQuery...');
     final tutorial = await generateTutorial(howToQuery, imageBytes: imageBytes);
     
     print('[GeminiService] Tutorial text generated with ${tutorial.steps.length} steps');

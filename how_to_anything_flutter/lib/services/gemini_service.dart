@@ -6,6 +6,7 @@ import '../models/tutorial_step.dart';
 
 class GeminiService {
   late final GenerativeModel _textModel;
+  late final GenerativeModel _imageModel;
   
   static const List<String> _voices = [
     "Puck", "Charon", "Kore", "Fenrir", "Leda", "Zephyr", "Orus", "Aoede"
@@ -19,11 +20,20 @@ class GeminiService {
         temperature: 0.7,
       ),
     );
+    
+    // Initialize image generation model with Firebase AI
+    _imageModel = FirebaseAI.googleAI().generativeModel(
+      model: 'gemini-2.5-flash-image-preview',
+      generationConfig: GenerationConfig(
+        temperature: 0.7,
+        responseModalities: [ResponseModalities.text, ResponseModalities.image],
+      ),
+    );
   }
 
   Future<Tutorial> generateTutorial(String howToQuery) async {
     final prompt = '''
-Create a comprehensive, practical tutorial for: "$howToQuery"
+Create a concise, practical tutorial for: "$howToQuery"
 
 Please respond with a valid JSON object that matches this exact schema:
 {
@@ -48,32 +58,44 @@ Please respond with a valid JSON object that matches this exact schema:
 }
 
 Guidelines:
-- Make the tutorial detailed and actionable
+- Create tutorials with EXACTLY 2 steps for optimal mobile viewing experience
+- Make each step substantial, detailed and actionable - combine multiple actions if needed
 - Include specific measurements, times, and techniques where applicable
-- Add helpful tips and safety warnings
+- Add helpful tips and safety warnings for each step
 - For each step, create a detailed image prompt that describes a photorealistic 
   instructional photo that would help someone complete that step
 - Image prompts should maintain consistency in setting, lighting, and style
-- Focus on practical, real-world instructions
+- Focus on the most essential actions - break complex tasks into 2 main phases
+- Image prompts should specify NO TEXT or words should appear in the generated image
 - Return ONLY the JSON object, no additional text
 
 Example for "how to tie a tie":
 {
   "title": "How to Tie a Classic Four-in-Hand Tie",
-  "description": "Learn to tie a professional-looking tie knot in 6 simple steps",
+  "description": "Learn to tie a professional-looking tie knot in 2 simple steps",
   "difficulty": "Easy",
   "total_time": "2-3 minutes",
   "tools_required": ["Necktie", "Mirror"],
   "steps": [
     {
       "step_number": 1,
-      "title": "Position the tie around your neck",
-      "description": "Drape the tie around your neck with the collar up. The wide end should hang about 12 inches lower than the narrow end on your right side.",
-      "tips": ["Make sure the wide end is on your right side", "The exact length may vary based on your height"],
-      "warnings": ["Don't make the wide end too short or you won't be able to complete the knot"],
+      "title": "Position and cross the tie",
+      "description": "Drape the tie around your neck with collar up, wide end 12 inches lower on your right. Cross the wide end over the narrow end near your collar, creating an X-shape. Hold this crossing point firmly with your non-dominant hand.",
+      "tips": ["Keep the wide end on your right side", "The crossing should be close to your neck", "Maintain firm grip on the crossing point"],
+      "warnings": ["Don't make the wide end too short or you won't complete the knot"],
       "tools_needed": ["Necktie"],
-      "estimated_time": "10 seconds",
-      "image_prompt": "Professional man in white dress shirt standing in front of mirror, draping a navy blue silk tie around his neck, wide end hanging lower on the right side, good lighting"
+      "estimated_time": "30 seconds",
+      "image_prompt": "Professional man in white dress shirt at mirror, hands positioned crossing a navy silk tie near his collar, wide end over narrow end forming X-shape, focused on hand positioning"
+    },
+    {
+      "step_number": 2,
+      "title": "Form and tighten the knot",
+      "description": "Wrap the wide end behind and around the narrow end, then pull it up through the neck loop from underneath. Pull the wide end down through the front loop you just created, then slide the knot up by pulling the narrow end while holding the knot.",
+      "tips": ["Keep movements smooth and controlled", "Adjust knot position by sliding up or down", "The wide end should reach your belt buckle"],
+      "warnings": ["Don't pull too hard or the knot will become too tight"],
+      "tools_needed": ["Necktie"],
+      "estimated_time": "60 seconds",
+      "image_prompt": "Close-up of hands completing a tie knot, pulling wide end through the front loop, navy silk tie against white dress shirt, professional lighting showing knot formation detail"
     }
   ],
   "safety_notes": ["Avoid tying the knot too tightly to prevent discomfort"]
@@ -108,8 +130,44 @@ Example for "how to tie a tie":
   }
 
   Future<Uint8List> generateStepImage(TutorialStep step, Uint8List? previousImageBytes) async {
-    // For now, image generation is disabled - can be enabled when image generation model is properly configured
-    throw Exception('Image generation currently disabled - focusing on text tutorials first');
+    print('[GeminiService] generateStepImage called for step ${step.stepNumber}: ${step.title}');
+    try {
+      // Create a detailed prompt for image generation
+      final imagePrompt = '''
+Generate a clear, instructional photo for step ${step.stepNumber} of a tutorial: "${step.title}"
+
+Image requirements:
+- ${step.imagePrompt}
+- Professional, well-lit instructional style
+- Clear focus on the main action or object
+- Photorealistic quality
+- Clean, uncluttered composition
+- Suitable for educational/tutorial content
+- NO TEXT, NO WORDS, NO LETTERS visible in the image
+- NO captions, labels, or written instructions
+- Focus purely on visual demonstration
+- Show hands, tools, objects, and actions without any text overlay
+
+Additional context:
+${step.description.length > 200 ? step.description.substring(0, 200) + '...' : step.description}
+''';
+
+      print('[GeminiService] Sending image generation request to Firebase AI');
+      final prompt = [Content.text(imagePrompt)];
+      final response = await _imageModel.generateContent(prompt);
+      
+      print('[GeminiService] Response received, checking for inline data parts');
+      if (response.inlineDataParts.isNotEmpty) {
+        final bytes = response.inlineDataParts.first.bytes;
+        print('[GeminiService] Image generated successfully: ${bytes.length} bytes');
+        return bytes;
+      } else {
+        print('[GeminiService] ERROR: No inline data parts in response');
+        throw Exception('No images were generated for step ${step.stepNumber}');
+      }
+    } catch (e) {
+      throw Exception('Error generating image for step ${step.stepNumber}: $e');
+    }
   }
 
   Future<Uint8List> generateVoiceNarration(String text, int stepNumber) async {
@@ -119,24 +177,70 @@ Example for "how to tie a tie":
   }
 
   Future<Tutorial> generateCompleteTutorial(String howToQuery, 
-      Function(String)? onProgress) async {
+      Function(String)? onProgress, 
+      {bool generateImages = true,
+      Function(int, String?)? onImageUpdate}) async {
     
+    print('[GeminiService] Starting tutorial generation for: $howToQuery');
     onProgress?.call('Generating tutorial structure...');
     final tutorial = await generateTutorial(howToQuery);
     
-    // For now, we'll just return the tutorial without images and audio
-    // since those features require more complex setup
-    onProgress?.call('Tutorial generation complete!');
+    print('[GeminiService] Tutorial text generated with ${tutorial.steps.length} steps');
+    // Return tutorial with text immediately
+    onProgress?.call('Tutorial text ready! Loading images...');
     
-    // Return tutorial with steps but no media
-    final updatedSteps = <TutorialStep>[];
-    for (final step in tutorial.steps) {
-      updatedSteps.add(step.copyWith(
-        imageUrl: null, // No image for now
-        audioUrl: null, // No audio for now
-      ));
+    if (generateImages) {
+      print('[GeminiService] Starting async image generation');
+      // Generate images asynchronously after returning the tutorial
+      // Important: We don't await this, so the tutorial returns immediately
+      _generateImagesAsync(tutorial, onProgress, onImageUpdate).then((_) {
+        print('[GeminiService] All images generation completed');
+      }).catchError((error) {
+        print('[GeminiService] Error in async image generation: $error');
+      });
+    } else {
+      print('[GeminiService] Image generation disabled');
     }
     
-    return tutorial.copyWith(steps: updatedSteps);
+    return tutorial;
+  }
+  
+  Future<void> _generateImagesAsync(Tutorial tutorial, 
+      Function(String)? onProgress,
+      Function(int, String?)? onImageUpdate) async {
+    
+    print('[GeminiService] _generateImagesAsync started for ${tutorial.steps.length} steps');
+    
+    for (int i = 0; i < tutorial.steps.length; i++) {
+      final step = tutorial.steps[i];
+      print('[GeminiService] Generating image for step ${i + 1}/${tutorial.steps.length}');
+      onProgress?.call('Generating image for step ${i + 1} of ${tutorial.steps.length}...');
+      
+      try {
+        // Generate image for this step
+        print('[GeminiService] Calling generateStepImage for step ${i + 1}');
+        final imageBytes = await generateStepImage(step, null);
+        
+        print('[GeminiService] Image bytes received: ${imageBytes.length} bytes');
+        // Convert to base64 data URL
+        final base64String = base64Encode(imageBytes);
+        final imageDataUrl = 'data:image/png;base64,$base64String';
+        
+        print('[GeminiService] Image converted to base64, calling onImageUpdate');
+        // Notify about the image update
+        onImageUpdate?.call(i, imageDataUrl);
+        
+        onProgress?.call('Generated image for step ${i + 1} of ${tutorial.steps.length}');
+        print('[GeminiService] Successfully generated image for step ${i + 1}');
+      } catch (e) {
+        // If image generation fails, continue without image
+        print('[GeminiService] ERROR: Failed to generate image for step ${i + 1}: $e');
+        onProgress?.call('Skipped image for step ${i + 1} (generation failed)');
+        onImageUpdate?.call(i, null);
+      }
+    }
+    
+    onProgress?.call('All images loaded!');
+    print('[GeminiService] _generateImagesAsync completed');
   }
 }

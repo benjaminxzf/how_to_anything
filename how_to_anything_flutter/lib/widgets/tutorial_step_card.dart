@@ -1,8 +1,130 @@
-import 'package:flutter/material.dart';
-import 'package:audioplayers/audioplayers.dart';
+import 'dart:ui';
 import 'dart:convert';
 import 'dart:typed_data';
+import 'package:flutter/material.dart';
+import 'package:audioplayers/audioplayers.dart';
 import '../models/tutorial_step.dart';
+
+class _BananaLoadingPlaceholder extends StatefulWidget {
+  final String imagePrompt;
+
+  const _BananaLoadingPlaceholder({
+    Key? key,
+    required this.imagePrompt,
+  }) : super(key: key);
+
+  @override
+  State<_BananaLoadingPlaceholder> createState() => _BananaLoadingPlaceholderState();
+}
+
+class _BananaLoadingPlaceholderState extends State<_BananaLoadingPlaceholder>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _animationController;
+  late Animation<double> _rotationAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      duration: const Duration(seconds: 2),
+      vsync: this,
+    )..repeat(reverse: true);
+    
+    _rotationAnimation = Tween<double>(
+      begin: -0.1,
+      end: 0.1,
+    ).animate(CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeInOut,
+    ));
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      height: 280,
+      decoration: BoxDecoration(
+        color: Colors.black.withOpacity(0.2),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: Colors.white.withOpacity(0.1),
+          width: 1,
+        ),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          AnimatedBuilder(
+            animation: _rotationAnimation,
+            builder: (context, child) {
+              return Transform.rotate(
+                angle: _rotationAnimation.value,
+                child: Text(
+                  '🍌',
+                  style: TextStyle(fontSize: 60),
+                ),
+              );
+            },
+          ),
+          const SizedBox(height: 16),
+          // Loading dots animation
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: List.generate(3, (index) {
+              return AnimatedBuilder(
+                animation: _animationController,
+                builder: (context, child) {
+                  final value = (_animationController.value + index * 0.2) % 1.0;
+                  return Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 3),
+                    width: 8,
+                    height: 8,
+                    decoration: BoxDecoration(
+                      color: Colors.cyan.withOpacity(0.3 + value * 0.5),
+                      shape: BoxShape.circle,
+                    ),
+                  );
+                },
+              );
+            }),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'GENERATING IMAGE',
+            style: TextStyle(
+              color: Colors.white.withOpacity(0.3),
+              fontSize: 10,
+              letterSpacing: 3,
+              fontWeight: FontWeight.w300,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Text(
+              widget.imagePrompt.length > 60 
+                ? '${widget.imagePrompt.substring(0, 60)}...'
+                : widget.imagePrompt,
+              style: TextStyle(
+                color: Colors.white.withOpacity(0.2),
+                fontSize: 11,
+                fontStyle: FontStyle.italic,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
 
 class TutorialStepCard extends StatefulWidget {
   final TutorialStep step;
@@ -18,10 +140,10 @@ class TutorialStepCard extends StatefulWidget {
   State<TutorialStepCard> createState() => _TutorialStepCardState();
 }
 
-class _TutorialStepCardState extends State<TutorialStepCard> {
+class _TutorialStepCardState extends State<TutorialStepCard> 
+    with AutomaticKeepAliveClientMixin {
   final AudioPlayer _audioPlayer = AudioPlayer();
   bool _isPlaying = false;
-  bool _isLoading = false;
 
   @override
   void initState() {
@@ -45,251 +167,198 @@ class _TutorialStepCardState extends State<TutorialStepCard> {
     if (widget.step.audioUrl == null) return;
     
     try {
-      setState(() {
-        _isLoading = true;
-      });
-
       if (_isPlaying) {
         await _audioPlayer.stop();
         return;
       }
 
-      // Parse data URL and create audio source
       final audioDataUrl = widget.step.audioUrl!;
       if (audioDataUrl.startsWith('data:audio/wav;base64,')) {
         final base64String = audioDataUrl.substring('data:audio/wav;base64,'.length);
         final audioBytes = base64Decode(base64String);
-        
         await _audioPlayer.play(BytesSource(audioBytes));
       }
     } catch (e) {
       print('Error playing audio: $e');
-      // Show error message
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Could not play audio: ${e.toString()}'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
     }
   }
 
   @override
+  bool get wantKeepAlive => true; // Keep card alive during swipe
+  
+  @override
   Widget build(BuildContext context) {
+    super.build(context); // Required for AutomaticKeepAliveClientMixin
     return AnimatedContainer(
       duration: const Duration(milliseconds: 200),
-      child: Card(
-        elevation: widget.isActive ? 8 : 2,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        child: Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20),
-            gradient: widget.isActive
-                ? LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      Colors.white,
-                      const Color(0xFF6366F1).withOpacity(0.02),
-                    ],
-                  )
-                : null,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Step header
-              Row(
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(30),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.05),
+              borderRadius: BorderRadius.circular(30),
+              border: Border.all(
+                color: widget.isActive 
+                    ? Colors.cyan.withOpacity(0.3)
+                    : Colors.white.withOpacity(0.1),
+                width: 1,
+              ),
+              boxShadow: widget.isActive
+                  ? [
+                      BoxShadow(
+                        color: Colors.cyan.withOpacity(0.2),
+                        blurRadius: 30,
+                        spreadRadius: 5,
+                      ),
+                    ]
+                  : null,
+            ),
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF6366F1),
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: const Color(0xFF6366F1).withOpacity(0.3),
-                          blurRadius: 8,
-                          offset: const Offset(0, 2),
+                  // Step header
+                  Row(
+                    children: [
+                      Container(
+                        width: 36,
+                        height: 36,
+                        decoration: BoxDecoration(
+                          color: Colors.cyan.withOpacity(0.2),
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: Colors.cyan.withOpacity(0.5),
+                            width: 1,
+                          ),
                         ),
-                      ],
-                    ),
-                    child: Center(
-                      child: Text(
-                        '${widget.step.stepNumber}',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
+                        child: Center(
+                          child: Text(
+                            '${widget.step.stepNumber}',
+                            style: TextStyle(
+                              color: Colors.cyan.withOpacity(0.9),
+                              fontWeight: FontWeight.w300,
+                              fontSize: 14,
+                            ),
+                          ),
                         ),
                       ),
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          widget.step.title,
-                          style: const TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xFF1F2937),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              widget.step.title.toUpperCase(),
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w300,
+                                letterSpacing: 2,
+                                color: Colors.white.withOpacity(0.9),
+                              ),
+                            ),
+                            if (widget.step.estimatedTime != null)
+                              Text(
+                                widget.step.estimatedTime!.toUpperCase(),
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  letterSpacing: 1,
+                                  color: Colors.white.withOpacity(0.4),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                      if (widget.step.audioUrl != null)
+                        IconButton(
+                          onPressed: _playAudio,
+                          icon: Icon(
+                            _isPlaying ? Icons.pause_circle : Icons.play_circle,
+                            color: Colors.cyan.withOpacity(0.6),
+                            size: 28,
                           ),
                         ),
-                        if (widget.step.estimatedTime != null)
-                          Text(
-                            '⏱️ ${widget.step.estimatedTime}',
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.grey[600],
-                            ),
-                          ),
-                      ],
+                    ],
+                  ),
+                  
+                  const SizedBox(height: 24),
+                  
+                  // Step image with full width and dynamic height
+                  if (widget.step.imageUrl != null && widget.step.imageUrl!.isNotEmpty)
+                    Container(
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.3),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: Colors.white.withOpacity(0.1),
+                          width: 1,
+                        ),
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(20),
+                        // Wrap in IntrinsicHeight to maintain aspect ratio
+                        child: IntrinsicHeight(
+                          child: _buildImage(),
+                        ),
+                      ),
+                    )
+                  else
+                    _BananaLoadingPlaceholder(
+                      imagePrompt: widget.step.imagePrompt,
+                    ),
+                  
+                  const SizedBox(height: 24),
+                  
+                  // Step description
+                  Text(
+                    widget.step.description,
+                    style: TextStyle(
+                      fontSize: 15,
+                      height: 1.6,
+                      color: Colors.white.withOpacity(0.7),
+                      fontWeight: FontWeight.w300,
                     ),
                   ),
-                  // Audio control button
-                  Container(
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF6366F1).withOpacity(0.1),
-                      shape: BoxShape.circle,
+                  
+                  // Tools needed for this step
+                  if (widget.step.toolsNeeded != null && 
+                      widget.step.toolsNeeded!.isNotEmpty) ...[
+                    const SizedBox(height: 20),
+                    _buildInfoSection(
+                      icon: Icons.build_outlined,
+                      title: 'TOOLS',
+                      items: widget.step.toolsNeeded!,
+                      color: Colors.blue,
                     ),
-                    child: IconButton(
-                      onPressed: widget.step.audioUrl != null ? _playAudio : null,
-                      icon: _isLoading
-                          ? const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : Icon(
-                              _isPlaying ? Icons.pause : Icons.play_arrow,
-                              color: widget.step.audioUrl != null
-                                  ? const Color(0xFF6366F1)
-                                  : Colors.grey,
-                            ),
+                  ],
+                  
+                  // Tips
+                  if (widget.step.tips != null && widget.step.tips!.isNotEmpty) ...[
+                    const SizedBox(height: 20),
+                    _buildInfoSection(
+                      icon: Icons.lightbulb_outline,
+                      title: 'TIPS',
+                      items: widget.step.tips!,
+                      color: Colors.green,
                     ),
-                  ),
+                  ],
+                  
+                  // Warnings
+                  if (widget.step.warnings != null && widget.step.warnings!.isNotEmpty) ...[
+                    const SizedBox(height: 20),
+                    _buildInfoSection(
+                      icon: Icons.warning_amber_outlined,
+                      title: 'WARNINGS',
+                      items: widget.step.warnings!,
+                      color: Colors.orange,
+                    ),
+                  ],
                 ],
               ),
-              
-              const SizedBox(height: 20),
-              
-              // Step image
-              if (widget.step.imageUrl != null && widget.step.imageUrl!.isNotEmpty)
-                Container(
-                  width: double.infinity,
-                  height: 200,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: _buildImage(),
-                  ),
-                )
-              else
-                Container(
-                  width: double.infinity,
-                  height: 200,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[100],
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.grey[300]!),
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.auto_awesome,
-                        size: 48,
-                        color: Colors.grey[400],
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'AI Image',
-                        style: TextStyle(
-                          color: Colors.grey[600],
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        widget.step.imagePrompt.length > 80 
-                          ? '${widget.step.imagePrompt.substring(0, 80)}...'
-                          : widget.step.imagePrompt,
-                        style: TextStyle(
-                          color: Colors.grey[500],
-                          fontSize: 12,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  ),
-                ),
-              
-              const SizedBox(height: 20),
-              
-              // Step description
-              Text(
-                widget.step.description,
-                style: const TextStyle(
-                  fontSize: 16,
-                  height: 1.5,
-                  color: Color(0xFF374151),
-                ),
-              ),
-              
-              // Tools needed for this step
-              if (widget.step.toolsNeeded != null && 
-                  widget.step.toolsNeeded!.isNotEmpty) ...[
-                const SizedBox(height: 16),
-                _buildInfoSection(
-                  icon: Icons.build_outlined,
-                  title: 'Tools needed:',
-                  items: widget.step.toolsNeeded!,
-                  color: Colors.blue,
-                ),
-              ],
-              
-              // Tips
-              if (widget.step.tips != null && widget.step.tips!.isNotEmpty) ...[
-                const SizedBox(height: 16),
-                _buildInfoSection(
-                  icon: Icons.lightbulb_outline,
-                  title: 'Tips:',
-                  items: widget.step.tips!,
-                  color: Colors.green,
-                ),
-              ],
-              
-              // Warnings
-              if (widget.step.warnings != null && widget.step.warnings!.isNotEmpty) ...[
-                const SizedBox(height: 16),
-                _buildInfoSection(
-                  icon: Icons.warning_amber_outlined,
-                  title: 'Warnings:',
-                  items: widget.step.warnings!,
-                  color: Colors.orange,
-                ),
-              ],
-            ],
+            ),
           ),
         ),
       ),
@@ -300,58 +369,69 @@ class _TutorialStepCardState extends State<TutorialStepCard> {
     final imageUrl = widget.step.imageUrl!;
     
     if (imageUrl.startsWith('data:image')) {
-      // Handle data URL
       try {
         final base64String = imageUrl.split(',')[1];
         final imageBytes = base64Decode(base64String);
-        return Image.memory(
-          imageBytes,
-          fit: BoxFit.cover,
-          width: double.infinity,
-          height: double.infinity,
-          errorBuilder: (context, error, stackTrace) {
-            return Container(
-              color: Colors.grey[200],
-              child: const Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.error_outline, size: 48, color: Colors.grey),
-                    SizedBox(height: 8),
-                    Text('Failed to load image', style: TextStyle(color: Colors.grey)),
-                  ],
+        
+        // Wrap in RepaintBoundary to prevent disposal during animation
+        return RepaintBoundary(
+          child: Image.memory(
+            imageBytes,
+            fit: BoxFit.fitWidth,
+            width: double.infinity,
+            gaplessPlayback: true, // Prevents flicker during rebuild
+            cacheWidth: 1200, // Cache at reasonable resolution
+            errorBuilder: (context, error, stackTrace) {
+              return Container(
+                height: 200,
+                color: Colors.black.withOpacity(0.2),
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.broken_image_outlined, 
+                        size: 40, 
+                        color: Colors.white.withOpacity(0.3),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'IMAGE LOAD ERROR',
+                        style: TextStyle(
+                          color: Colors.white.withOpacity(0.3),
+                          fontSize: 10,
+                          letterSpacing: 2,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            );
-          },
+              );
+            },
+          ),
         );
       } catch (e) {
         return Container(
-          color: Colors.grey[200],
-          child: const Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.error_outline, size: 48, color: Colors.grey),
-                SizedBox(height: 8),
-                Text('Invalid image data', style: TextStyle(color: Colors.grey)),
-              ],
+          height: 200,
+          color: Colors.black.withOpacity(0.2),
+          child: Center(
+            child: Icon(
+              Icons.error_outline,
+              size: 40,
+              color: Colors.white.withOpacity(0.3),
             ),
           ),
         );
       }
     } else {
-      // Handle regular URL (future enhancement)
       return Container(
-        color: Colors.grey[200],
-        child: const Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.image_not_supported, size: 48, color: Colors.grey),
-              SizedBox(height: 8),
-              Text('Image format not supported', style: TextStyle(color: Colors.grey)),
-            ],
+        height: 200,
+        color: Colors.black.withOpacity(0.2),
+        child: Center(
+          child: Icon(
+            Icons.image_not_supported,
+            size: 40,
+            color: Colors.white.withOpacity(0.3),
           ),
         ),
       );
@@ -367,51 +447,60 @@ class _TutorialStepCardState extends State<TutorialStepCard> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.08),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.2)),
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: color.withOpacity(0.3),
+          width: 1,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(icon, size: 18, color: color),
+              Icon(
+                icon,
+                size: 16,
+                color: color.withOpacity(0.8),
+              ),
               const SizedBox(width: 8),
               Text(
                 title,
                 style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: color,
+                  fontSize: 11,
+                  letterSpacing: 2,
+                  fontWeight: FontWeight.w400,
+                  color: color.withOpacity(0.8),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 12),
           ...items.map((item) {
             return Padding(
-              padding: const EdgeInsets.only(bottom: 4),
+              padding: const EdgeInsets.only(bottom: 6),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Container(
-                    margin: const EdgeInsets.only(top: 8),
-                    width: 4,
-                    height: 4,
+                    margin: const EdgeInsets.only(top: 6),
+                    width: 3,
+                    height: 3,
                     decoration: BoxDecoration(
-                      color: color,
+                      color: color.withOpacity(0.6),
                       shape: BoxShape.circle,
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: 10),
                   Expanded(
                     child: Text(
                       item,
                       style: TextStyle(
-                        fontSize: 14,
-                        color: color.withOpacity(0.8),
+                        fontSize: 13,
+                        color: Colors.white.withOpacity(0.6),
                         height: 1.4,
+                        fontWeight: FontWeight.w300,
                       ),
                     ),
                   ),
